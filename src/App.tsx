@@ -1,26 +1,44 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Sidebar from './components/sidebar';
+import Header from './components/header';
+import Projects from './components/projects';
+import Employees from './components/employees';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="container">
+        <Sidebar />
+        <div className="main-content">
+          <Header />
+          <div className="content-wrapper">
+            <Routes>
+              <Route
+                path="/dashboard"
+                element={
+                  <div>
+                    <h2>📊 Dashboard</h2>
+                    <p>Ласкаво просимо до вашої інформаційної панелі!</p>
+                  </div>
+                }
+              />
+              <Route path="/projects" element={<Projects />} />
+              <Route path="/employees" element={<Employees />} />
+              <Route
+                path="/analytics"
+                element={
+                  <div>
+                    <h2>📈 Analytics</h2>
+                    <p>Аналізуйте дані вашої компанії.</p>
+                  </div>
+                }
+              />
+            </Routes>
+          </div>
+        </div>
+      </div>
+    </Router>
   );
-}
+};
 
 export default App;
