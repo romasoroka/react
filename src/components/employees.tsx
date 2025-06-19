@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import './employees.css';
-
 
 interface Employee {
   id: number;
@@ -103,14 +101,16 @@ const Employees = () => {
     });
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = event.target;
     setNewEmployee({ ...newEmployee, [name]: value });
   };
 
   const createEmployee = (event: React.FormEvent) => {
     event.preventDefault();
-    const newId = employees.length + 1; 
+    const newId = employees.length + 1;
     const employee: Employee = {
       id: newId,
       name: newEmployee.name,
@@ -127,19 +127,31 @@ const Employees = () => {
   };
 
   return (
-    <div className="employees-page">
-      <h2 className="page-title">👥 Employees</h2>
-      <button className="create-employee-button" onClick={openCreateModal}>
+    <div className="max-w-6xl mx-auto p-8 md:p-4">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2 md:text-2xl">
+        👥 Employees
+      </h2>
+      <button
+        className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold mb-6 hover:bg-blue-700 transition-colors"
+        onClick={openCreateModal}
+      >
         Додати програміста
       </button>
-      <div className="employees-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {employees.map((employee) => (
-          <div key={employee.id} className="employee-card" onClick={() => openModal(employee)}>
-            <h3 className="employee-name">{employee.name}</h3>
-            <p className="employee-position">{employee.position}</p>
-            <div className="employee-skills">
+          <div
+            key={employee.id}
+            className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer"
+            onClick={() => openModal(employee)}
+          >
+            <h3 className="text-lg font-semibold text-gray-800 mb-2">{employee.name}</h3>
+            <p className="text-sm text-gray-500 mb-4">{employee.position}</p>
+            <div className="flex flex-wrap gap-2">
               {employee.skills.map((skill, index) => (
-                <span key={index} className="skill-tag">
+                <span
+                  key={index}
+                  className="bg-gradient-to-r from-indigo-100 to-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold hover:scale-105 transition-transform"
+                >
                   {skill}
                 </span>
               ))}
@@ -148,145 +160,177 @@ const Employees = () => {
         ))}
       </div>
 
-      {/* Модальне вікно для деталей програміста */}
       {selectedEmployee && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeModal}>
-              <FaTimes size={20} />
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] animate-fadeIn"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-10 w-[90%] max-w-[650px] max-h-[85vh] overflow-y-auto shadow-2xl relative animate-slideIn md:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-5 right-5 bg-gray-100 text-gray-600 p-2 rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+              onClick={closeModal}
+            >
+              {(FaTimes as any)({ size: 20 })}
             </button>
-            <h2 className="modal-title">{selectedEmployee.name}</h2>
-            <div className="modal-section">
-              <span className="modal-label">Посада:</span>
-              <span>{selectedEmployee.position}</span>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Біографія:</span>
-              <p className="modal-bio">{selectedEmployee.bio}</p>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Навички:</span>
-              <div className="modal-skills">
-                {selectedEmployee.skills.map((skill, index) => (
-                  <span key={index} className="skill-tag">
-                    {skill}
-                  </span>
-                ))}
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2 md:text-xl">
+              {selectedEmployee.name}
+            </h2>
+            <div className="flex flex-col gap-4">
+              <div className="p-4 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <span className="text-sm font-semibold text-gray-800">Посада:</span>
+                <span className="text-sm text-gray-600 ml-2">{selectedEmployee.position}</span>
               </div>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Досвід:</span>
-              <span>{selectedEmployee.experience}</span>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Проєкти:</span>
-              <div className="modal-projects">
-                {selectedEmployee.projects.map((project, index) => (
-                  <span key={index} className="project-tag">
-                    {project}
-                  </span>
-                ))}
+              <div className="p-4 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <span className="text-sm font-semibold text-gray-800">Біографія:</span>
+                <p className="text-sm text-gray-600 mt-2 leading-relaxed">{selectedEmployee.bio}</p>
               </div>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Email:</span>
-              <span>{selectedEmployee.email}</span>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Телефон:</span>
-              <span>{selectedEmployee.phone}</span>
+              <div className="p-4 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <span className="text-sm font-semibold text-gray-800">Навички:</span>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedEmployee.skills.map((skill, index) => (
+                    <span
+                      key={index}
+                      className="bg-gradient-to-r from-indigo-100 to-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold hover:scale-105 transition-transform"
+                    >
+                      {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <span className="text-sm font-semibold text-gray-800">Досвід:</span>
+                <span className="text-sm text-gray-600 ml-2">{selectedEmployee.experience}</span>
+              </div>
+              <div className="p-4 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <span className="text-sm font-semibold text-gray-800">Проєкти:</span>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {selectedEmployee.projects.map((project, index) => (
+                    <span
+                      key={index}
+                      className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-semibold"
+                    >
+                      {project}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="p-4 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <span className="text-sm font-semibold text-gray-800">Email:</span>
+                <span className="text-sm text-gray-600 ml-2">{selectedEmployee.email}</span>
+              </div>
+              <div className="p-4 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <span className="text-sm font-semibold text-gray-800">Телефон:</span>
+                <span className="text-sm text-gray-600 ml-2">{selectedEmployee.phone}</span>
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {showCreateModal && (
-        <div className="modal-overlay" onClick={closeCreateModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeCreateModal}>
-              <FaTimes size={20} />
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-[1000] animate-fadeIn"
+          onClick={closeCreateModal}
+        >
+          <div
+            className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-10 w-[90%] max-w-[650px] max-h-[85vh] overflow-y-auto shadow-2xl relative animate-slideIn md:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-5 right-5 bg-gray-100 text-gray-600 p-2 rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+              onClick={closeCreateModal}
+            >
+              {(FaTimes as any)({ size: 20 })}
             </button>
-            <h2 className="modal-title">Додати нового програміста</h2>
-            <form onSubmit={createEmployee} className="create-form">
-              <div className="modal-section">
-                <label className="modal-label">Ім’я:</label>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2 md:text-xl">
+              Додати нового програміста
+            </h2>
+            <form onSubmit={createEmployee} className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Ім’я:</label>
                 <input
                   name="name"
                   value={newEmployee.name}
                   onChange={handleInputChange}
                   required
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Посада:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Посада:</label>
                 <input
                   name="position"
                   value={newEmployee.position}
                   onChange={handleInputChange}
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Навички (через кому):</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Навички (через кому):</label>
                 <input
                   name="skills"
                   value={newEmployee.skills}
                   onChange={handleInputChange}
                   placeholder="React, TypeScript"
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Досвід:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Досвід:</label>
                 <input
                   name="experience"
                   value={newEmployee.experience}
                   onChange={handleInputChange}
                   placeholder="5 років"
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Проєкти (через кому):</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Проєкти (через кому):</label>
                 <input
                   name="projects"
                   value={newEmployee.projects}
                   onChange={handleInputChange}
                   placeholder="E-Commerce Platform"
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Email:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Email:</label>
                 <input
                   name="email"
                   value={newEmployee.email}
                   onChange={handleInputChange}
                   type="email"
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Телефон:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Телефон:</label>
                 <input
                   name="phone"
                   value={newEmployee.phone}
                   onChange={handleInputChange}
                   type="tel"
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Біографія:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Біографія:</label>
                 <textarea
                   name="bio"
                   value={newEmployee.bio}
                   onChange={handleInputChange}
-                  className="modal-textarea"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none h-20"
                 />
               </div>
-              <button type="submit" className="submit-button">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+              >
                 Додати
               </button>
             </form>

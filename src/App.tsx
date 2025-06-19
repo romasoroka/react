@@ -2,10 +2,12 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/sidebar';
 import Header from './components/header';
 import Projects from './components/projects';
+import ProjectDetails from './components/project_details';
 import Employees from './components/employees';
 
 const App = () => {
   return (
+    
     <Router>
       <div className="container">
         <Sidebar />
@@ -22,6 +24,7 @@ const App = () => {
                   </div>
                 }
               />
+              <Route path="/projects/:id" element={<ProjectDetails />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/employees" element={<Employees />} />
               <Route
@@ -33,11 +36,13 @@ const App = () => {
                   </div>
                 }
               />
+              
             </Routes>
           </div>
         </div>
       </div>
     </Router>
+    
   );
 };
 

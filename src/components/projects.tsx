@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FaSearch, FaTimes } from 'react-icons/fa';
-import './projects.css';
+import { Link } from 'react-router-dom';
 
 interface Project {
   id: number;
@@ -62,9 +62,7 @@ const initialProjects: Project[] = [
 ];
 
 const Projects = () => {
-
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [projects, setProjects] = useState(initialProjects);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newProject, setNewProject] = useState({
@@ -84,17 +82,7 @@ const Projects = () => {
     project.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const openModal = (project: Project) => {
-    setSelectedProject(project);
-  };
-
-  const closeModal = () => {
-    setSelectedProject(null);
-  };
-
-  const openCreateModal = () => {
-    setShowCreateModal(true);
-  };
+  const openCreateModal = () => setShowCreateModal(true);
 
   const closeCreateModal = () => {
     setShowCreateModal(false);
@@ -112,14 +100,16 @@ const Projects = () => {
     });
   };
 
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = event.target;
     setNewProject({ ...newProject, [name]: value });
   };
 
   const createProject = (event: React.FormEvent) => {
     event.preventDefault();
-    const newId = projects.length + 1; 
+    const newId = projects.length + 1;
     const project: Project = {
       id: newId,
       name: newProject.name,
@@ -138,217 +128,199 @@ const Projects = () => {
   };
 
   return (
-    <div className="projects-page">
-      <h2 className="page-title">💼 Projects</h2>
-      <div className="search-bar">
-        <FaSearch className="search-icon" />
+    <div className="max-w-6xl mx-auto p-8 md:p-4">
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center gap-2 md:text-2xl">
+        💼 Projects
+      </h2>
+      <div className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm mb-8 max-w-md w-full md:max-w-full">
+        {(FaSearch as any)({ className: 'text-gray-500' })}
         <input
           type="text"
           placeholder="Пошук проєктів за назвою..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="search-input"
+          className="flex-1 border-none outline-none text-sm text-gray-600 placeholder-gray-400"
         />
       </div>
-      <button className="create-project-button" onClick={openCreateModal}>
+      <button
+        className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold mb-6 hover:bg-blue-700 transition-colors"
+        onClick={openCreateModal}
+      >
         Створити проєкт
       </button>
-      <div className="projects-grid">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProjects.length > 0 ? (
           filteredProjects.map((project) => (
-            <div key={project.id} className="project-card" onClick={() => openModal(project)}>
-              <h3 className="project-title">{project.name}</h3>
-              <p className="project-description">{project.description}</p>
-              <span className={`project-status status-${project.status.toLowerCase().replace(' ', '-')}`}>
+            <Link
+              key={project.id}
+              to={`/projects/${project.id}`}
+              className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer"
+            >
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">{project.name}</h3>
+              <p className="text-sm text-gray-500 mb-4 line-clamp-2">{project.description}</p>
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                  project.status === 'Active'
+                    ? 'bg-green-100 text-green-600'
+                    : project.status === 'In Progress'
+                    ? 'bg-yellow-100 text-yellow-600'
+                    : 'bg-indigo-100 text-indigo-600'
+                }`}
+              >
                 {project.status}
               </span>
-              <div className="project-technologies">
+              <div className="flex flex-wrap gap-2 mt-4">
                 {project.technologies.map((tech, index) => (
-                  <span key={index} className="tech-tag">
+                  <span
+                    key={index}
+                    className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium"
+                  >
                     {tech}
                   </span>
                 ))}
               </div>
-              <div className="project-programmers">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {project.programmers.map((programmer, index) => (
-                  <span key={index} className="programmer-tag">
+                  <span
+                    key={index}
+                    className="bg-gradient-to-r from-indigo-100 to-blue-100 text-blue-800 px-3 py-1 rounded-full text-xs font-semibold hover:scale-105 transition-transform"
+                  >
                     {programmer}
                   </span>
                 ))}
               </div>
-            </div>
+            </Link>
           ))
         ) : (
-          <p className="no-results">Проєктів не знайдено</p>
+          <p className="text-gray-500 text-center col-span-3 mt-8 text-base">
+            Проєктів не знайдено
+          </p>
         )}
       </div>
 
-      {selectedProject && (
-        <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeModal}>
-              <FaTimes size={20} />
-            </button>
-            <h2 className="modal-title">{selectedProject.name}</h2>
-            <div className="modal-section">
-              <span className="modal-label">Статус:</span>
-              <span className={`project-status status-${selectedProject.status.toLowerCase().replace(' ', '-')}`}>
-                {selectedProject.status}
-              </span>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Опис:</span>
-              <p className="modal-description">{selectedProject.detailedDescription}</p>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Технології:</span>
-              <div className="modal-technologies">
-                {selectedProject.technologies.map((tech, index) => (
-                  <span key={index} className="tech-tag">
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Команда:</span>
-              <div className="modal-programmers">
-                {selectedProject.programmers.map((programmer, index) => (
-                  <span key={index} className="programmer-tag">
-                    {programmer}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Дата початку:</span>
-              <span>{selectedProject.startDate}</span>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Дата завершення:</span>
-              <span>{selectedProject.endDate}</span>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Бюджет:</span>
-              <span>{selectedProject.budget}</span>
-            </div>
-            <div className="modal-section">
-              <span className="modal-label">Клієнт:</span>
-              <span>{selectedProject.client}</span>
-            </div>
-          </div>
-        </div>
-      )}
-
       {showCreateModal && (
-        <div className="modal-overlay" onClick={closeCreateModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={closeCreateModal}>
-              <FaTimes size={20} />
+        <div
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-[100] animate-fadeIn"
+          onClick={closeCreateModal}
+        >
+          <div
+            className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-10 w-[90%] max-w-[650px] max-h-[85vh] overflow-y-auto shadow-2xl relative animate-slideIn md:p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              className="absolute top-5 right-5 bg-gray-100 text-gray-600 p-2 rounded-full hover:bg-blue-600 hover:text-white transition-colors"
+              onClick={closeCreateModal}
+            >
+              {(FaTimes as any)({ size: 20 })}
             </button>
-            <h2 className="modal-title">Створити новий проєкт</h2>
-            <form onSubmit={createProject} className="create-form">
-              <div className="modal-section">
-                <label className="modal-label">Назва:</label>
+            <h2 className="text-2xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2 md:text-xl">
+              Створити новий проєкт
+            </h2>
+            <form onSubmit={createProject} className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Назва:</label>
                 <input
                   name="name"
                   value={newProject.name}
                   onChange={handleInputChange}
                   required
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Статус:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Статус:</label>
                 <select
                   name="status"
                   value={newProject.status}
                   onChange={handleInputChange}
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 >
                   <option value="Active">Active</option>
                   <option value="In Progress">In Progress</option>
                   <option value="Completed">Completed</option>
                 </select>
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Технології (через кому):</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Технології (через кому):</label>
                 <input
                   name="technologies"
                   value={newProject.technologies}
                   onChange={handleInputChange}
                   placeholder="React, TypeScript"
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Короткий опис:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Короткий опис:</label>
                 <textarea
                   name="description"
                   value={newProject.description}
                   onChange={handleInputChange}
-                  className="modal-textarea"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none h-20"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Програмісти (через кому):</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Програмісти (через кому):</label>
                 <input
                   name="programmers"
                   value={newProject.programmers}
                   onChange={handleInputChange}
                   placeholder="Олег Петренко, Марія Іванова"
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Дата початку:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Дата початку:</label>
                 <input
                   name="startDate"
                   type="date"
                   value={newProject.startDate}
                   onChange={handleInputChange}
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Дата завершення:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Дата завершення:</label>
                 <input
                   name="endDate"
                   type="date"
                   value={newProject.endDate}
                   onChange={handleInputChange}
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Бюджет:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Бюджет:</label>
                 <input
                   name="budget"
                   value={newProject.budget}
                   onChange={handleInputChange}
                   placeholder="$50,000"
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Клієнт:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Клієнт:</label>
                 <input
                   name="client"
                   value={newProject.client}
                   onChange={handleInputChange}
-                  className="modal-input"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
                 />
               </div>
-              <div className="modal-section">
-                <label className="modal-label">Детальний опис:</label>
+              <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+                <label className="text-sm font-semibold text-gray-800">Детальний опис:</label>
                 <textarea
                   name="detailedDescription"
                   value={newProject.detailedDescription}
                   onChange={handleInputChange}
-                  className="modal-textarea"
+                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none h-20"
                 />
               </div>
-              <button type="submit" className="submit-button">
+              <button
+                type="submit"
+                className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+              >
                 Створити
               </button>
             </form>
@@ -359,4 +331,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default Projects;  

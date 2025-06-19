@@ -1,0 +1,48 @@
+import { Employee } from '../types';
+
+export const initialEmployees: Employee[] = [
+    {
+        id: 1,
+        name: 'Олег Петренко',
+        position: 'Senior Full-Stack Developer',
+        skills: ['React', 'Node.js', 'TypeScript', 'MongoDB'],
+        experience: '7 років',
+        projects: ['E-Commerce Platform'],
+        email: 'oleg.petrenko@example.com',
+        phone: '+380 (67) 123-4567',
+        bio: 'Олег — досвідчений розробник із фокусом на створення масштабованих веб-додатків. Спеціалізується на React і Node.js, має досвід управління командами.',
+      },
+      {
+        id: 2,
+        name: 'Марія Іванова',
+        position: 'Frontend Developer',
+        skills: ['React', 'TypeScript', 'Tailwind CSS'],
+        experience: '4 роки',
+        projects: ['E-Commerce Platform'],
+        email: 'maria.ivanova@example.com',
+        phone: '+380 (50) 987-6543',
+        bio: 'Марія створює сучасні та адаптивні інтерфейси користувача. Вона захоплюється UI/UX і має сильні навички в TypeScript.',
+      },
+      {
+        id: 3,
+        name: 'Дмитро Шевченко',
+        position: 'AI Engineer',
+        skills: ['Python', 'TensorFlow', 'Next.js'],
+        experience: '5 років',
+        projects: ['AI Chatbot'],
+        email: 'dmytro.shevchenko@example.com',
+        phone: '+380 (93) 555-7890',
+        bio: 'Дмитро спеціалізується на розробці AI-рішень, зокрема чат-ботів із підтримкою NLP. Має досвід інтеграції AI з веб-додатками.',
+      },
+      {
+        id: 4,
+        name: 'Олена Литвин',
+        position: 'Backend Developer',
+        skills: ['Python', 'Django', 'PostgreSQL'],
+        experience: '6 років',
+        projects: ['AI Chatbot'],
+        email: 'olena.lytvyn@example.com',
+        phone: '+380 (98) 222-3333',
+        bio: 'Олена — експерт із серверної розробки, зосереджена на створенні надійних API та оптимізації баз даних.',
+      },
+];
