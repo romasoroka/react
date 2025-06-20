@@ -20,7 +20,7 @@ interface FormFieldProps {
     textarea = false,
   }: FormFieldProps) => {
     return (
-      <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+      <div className="flex flex-col  p-2 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
         <label className="text-sm font-semibold text-gray-800">{label}</label>
         {textarea ? (
           <textarea

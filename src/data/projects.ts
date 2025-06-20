@@ -16,13 +16,13 @@ export const initialProjects: Project[] = [
       'Цей проєкт спрямований на створення повнофункціональної платформи електронної комерції з підтримкою багатомовності, інтеграцією Stripe та PayPal, а також аналітикою для власників бізнесу.',
     credentials: [
       {
-        type: 'Username/Password',
+        name: 'Username/Password',
         key: 'admin',
         value: 'securePass123',
         description: 'Admin account for backend dashboard',
       },
       {
-        type: 'API Key',
+        name: 'API Key',
         key: 'stripe_api_key',
         value: 'sk_test_123456789',
         description: 'Stripe payment integration',
@@ -48,7 +48,7 @@ export const initialProjects: Project[] = [
       'Розробка чат-бота з інтеграцією NLP для автоматизації клієнтської підтримки, з можливістю інтеграції з CRM-системами.',
     credentials: [
       {
-        type: 'Database URL',
+        name: 'Database URL',
         key: 'mongo_uri',
         value: 'mongodb://localhost:27017/chatbot',
         description: 'MongoDB connection for chatbot data',

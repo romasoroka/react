@@ -1,32 +1,28 @@
-import { Link } from 'react-router-dom';
-import Card from '../ui/Card';
+import { useNavigate } from 'react-router-dom';
 import { Project } from '../../types';
+import Card from '../ui/Card';
 
-interface ProjectListProps {
+interface ProjectsProps {
   projects: Project[];
 }
 
-const ProjectList = ({ projects }: ProjectListProps) => {
+const Projects = ({ projects }: ProjectsProps) => {
+  const navigate = useNavigate();
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {projects.length > 0 ? (
-        projects.map((project) => (
-          <Link key={project.id} to={`/projects/${project.id}`}>
-            <Card
-              title={project.name}
-              subtitle={project.description}
-              tags={project.technologies}
-              tagGradient
-            />
-          </Link>
-        ))
-      ) : (
-        <p className="text-gray-500 text-center col-span-3 mt-8 text-base">
-          Проєктів не знайдено
-        </p>
-      )}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {projects.map((project) => (
+        <Card
+          key={project.id}
+          title={project.name}
+          subtitle={project.description}
+          tags={project.technologies}
+          onClick={() => navigate(`/projects/${project.id}`)}
+          tagGradient={true}
+        />
+      ))}
     </div>
   );
 };
 
-export default ProjectList;
+export default Projects;

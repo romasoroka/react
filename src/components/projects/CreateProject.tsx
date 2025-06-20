@@ -1,7 +1,12 @@
 import { useState } from 'react';
+import Select from 'react-select';
 import Modal from '../ui/Modal';
 import FormField from '../ui/FormField';
 import { Project, Credential } from '../../types';
+import { techOptions } from '../../data/techOptions';
+import { initialEmployees } from '../../data/Employees';
+
+
 
 interface CreateProjectFormProps {
   onCreate: (project: Project) => void;
@@ -12,9 +17,9 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
   const [newProject, setNewProject] = useState({
     name: '',
     status: 'Active',
-    technologies: '',
+    technologies: [] as string[], 
     description: '',
-    programmers: '',
+    programmers: [] as string[],
     startDate: '',
     endDate: '',
     budget: '',
@@ -32,33 +37,17 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
     setNewProject({ ...newProject, [name]: value });
   };
 
-  const handleCredentialChange = (
-    index: number,
-    field: keyof Credential,
-    value: string
-  ) => {
-    const updatedCredentials = [...credentials];
-    updatedCredentials[index] = { ...updatedCredentials[index], [field]: value };
-    setCredentials(updatedCredentials);
-  };
 
-  const addCredential = () => {
-    setCredentials([...credentials, { type: 'Username/Password', key: '', value: '' }]);
-  };
-
-  const removeCredential = (index: number) => {
-    setCredentials(credentials.filter((_, i) => i !== index));
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const project: Project = {
-      id: Math.random(), // Replace with proper ID generation
+      id: Math.random(), 
       name: newProject.name,
       status: newProject.status,
-      technologies: newProject.technologies.split(',').map((t) => t.trim()).filter(Boolean),
+      technologies: newProject.technologies, 
       description: newProject.description,
-      programmers: newProject.programmers.split(',').map((p) => p.trim()).filter(Boolean),
+      programmers: newProject.programmers,
       startDate: newProject.startDate,
       endDate: newProject.endDate,
       budget: newProject.budget,
@@ -75,9 +64,9 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
     setNewProject({
       name: '',
       status: 'Active',
-      technologies: '',
+      technologies: [] as string[], 
       description: '',
-      programmers: '',
+      programmers: [] as string[],
       startDate: '',
       endDate: '',
       budget: '',
@@ -98,7 +87,7 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
         Створити проєкт
       </button>
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Створити новий проєкт">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+        <form onSubmit={handleSubmit} className="flex flex-col">
           <FormField
             label="Назва:"
             name="name"
@@ -106,7 +95,7 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
             onChange={handleInputChange}
             required
           />
-          <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+          <div className="flex flex-col  p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
             <label className="text-sm font-semibold text-gray-800">Статус:</label>
             <select
               name="status"
@@ -119,13 +108,28 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
               <option value="Completed">Completed</option>
             </select>
           </div>
-          <FormField
-            label="Технології (через кому):"
+          <div className="flex flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+          <label className="block p-2 text-sm font-medium text-gray-700 mb-1">Технології</label>
+          <Select
+            isMulti
             name="technologies"
-            value={newProject.technologies}
-            onChange={handleInputChange}
-            placeholder="React, TypeScript"
+            options={techOptions}
+            className="basic-multi-select px-2"
+            placeholder="Вибрати технології"
+            classNamePrefix="select"
+            value={techOptions.filter(option =>
+              newProject.technologies.includes(option.value)
+            )}
+            onChange={(selectedOptions) =>
+              setNewProject({
+                ...newProject,
+                technologies: selectedOptions.map((opt) => opt.value),
+              })
+            }
           />
+          </div>
+          
+
           <FormField
             label="Короткий опис:"
             name="description"
@@ -133,13 +137,33 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
             onChange={handleInputChange}
             textarea
           />
-          <FormField
-            label="Програмісти (через кому):"
+           <div className="flex flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+          <label className="block p-2 text-sm font-medium text-gray-700 mb-1">Програмісти</label>
+          <Select
+            isMulti
             name="programmers"
-            value={newProject.programmers}
-            onChange={handleInputChange}
-            placeholder="Олег Петренко, Марія Іванова"
+            options={initialEmployees.map(emp => ({
+              value: emp.name,
+              label: emp.name,
+            }))}
+            className="basic-multi-select px-2"
+            placeholder="Вибрати технології"
+            classNamePrefix="select"
+            value={initialEmployees
+              .filter(emp => newProject.programmers.includes(emp.name))
+              .map(emp => ({ value: emp.name, label: emp.name }))}
+            onChange={(selectedOptions) =>
+              setNewProject({
+                ...newProject,
+                programmers: selectedOptions
+                  ? selectedOptions.map((opt) => opt.value)
+                  : [],
+              })
+            }
           />
+
+          </div>
+         
           <FormField
             label="Дата початку:"
             name="startDate"
@@ -174,72 +198,7 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
             onChange={handleInputChange}
             textarea
           />
-          <FormField
-            label="Годин відпрацьовано:"
-            name="hoursLogged"
-            value={newProject.hoursLogged}
-            onChange={handleInputChange}
-            type="number"
-            placeholder="320"
-          />
-          <FormField
-            label="Звіти:"
-            name="reports"
-            value={newProject.reports}
-            onChange={handleInputChange}
-            type="number"
-            placeholder="1"
-          />
-          <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
-            <label className="text-sm font-semibold text-gray-800">Облікові дані:</label>
-            {credentials.map((cred, index) => (
-              <div key={index} className="flex flex-col gap-2 p-2 border border-gray-200 rounded-md">
-                <select
-                  value={cred.type}
-                  onChange={(e) => handleCredentialChange(index, 'type', e.target.value)}
-                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
-                >
-                  <option value="Username/Password">Username/Password</option>
-                  <option value="API Key">API Key</option>
-                  <option value="Database URL">Database URL</option>
-                  <option value="Other">Other</option>
-                </select>
-                <input
-                  placeholder="Key (e.g., username, API key)"
-                  value={cred.key}
-                  onChange={(e) => handleCredentialChange(index, 'key', e.target.value)}
-                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
-                />
-                <input
-                  placeholder="Value (e.g., password, secret)"
-                  value={cred.value || ''}
-                  onChange={(e) => handleCredentialChange(index, 'value', e.target.value)}
-                  type="password"
-                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
-                />
-                <input
-                  placeholder="Description (optional)"
-                  value={cred.description || ''}
-                  onChange={(e) => handleCredentialChange(index, 'description', e.target.value)}
-                  className="w-full p-2 border border-gray-200 rounded-md text-sm text-gray-600 focus:border-blue-600 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeCredential(index)}
-                  className="bg-red-600 text-white px-4 py-1 rounded-lg text-xs font-semibold hover:bg-red-700 transition-colors"
-                >
-                  Видалити
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={addCredential}
-              className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-blue-700 transition-colors mt-2"
-            >
-              Додати облікові дані
-            </button>
-          </div>
+
           <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"

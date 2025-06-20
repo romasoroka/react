@@ -1,5 +1,5 @@
 export interface Credential {
-  type: string; // e.g., "Username/Password", "API Key", "Database URL"
+  name: string; // e.g., "Username/Password", "API Key", "Database URL"
   key: string; // e.g., username, API key, URL
   value?: string; // e.g., password, secret value (optional for non-sensitive keys)
   description?: string; // Optional context (e.g., "Admin account for server")
@@ -37,10 +37,20 @@ export interface Project {
     name: string;
     position: string;
     skills: string[];
-    experience: string;
+    experience: number;
     projects: string[]; 
     email: string;
     phone: string;
     bio: string;
     stats: EmployeeStats;
+    image?: string; 
+    recentWorkSessions?: WorkSession[]; // New field
+  }
+
+  export interface WorkSession {
+    id: number;
+    date: string; // e.g., "2024-06-14"
+    project: string; // Project name
+    hours: number; // Hours worked
+    description: string; // Work description
   }

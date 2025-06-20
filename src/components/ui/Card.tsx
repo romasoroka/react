@@ -6,15 +6,23 @@ interface CardProps {
     tagGradient?: boolean;
   }
   
+  interface CardProps {
+    title: string;
+    subtitle?: string;
+    tags: string[];
+    onClick?: () => void;
+    tagGradient?: boolean;
+  }
+  
   const Card = ({ title, subtitle, tags, onClick, tagGradient = false }: CardProps) => {
     return (
       <div
-        className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer"
+        className="bg-white rounded-xl shadow-md p-6 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer flex flex-col min-h-[160px]"
         onClick={onClick}
       >
         <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}</h3>
         {subtitle && <p className="text-sm text-gray-500 mb-4">{subtitle}</p>}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mt-auto">
           {tags.map((tag, index) => (
             <span
               key={index}

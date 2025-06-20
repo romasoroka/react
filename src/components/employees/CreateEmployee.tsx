@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import Select from 'react-select';
 import Modal from '../ui/Modal';
 import FormField from '../ui/FormField';
-import { Employee } from '../../types';
+import { Employee, WorkSession } from '../../types';
+import { techOptions } from '../../data/techOptions';
 
 interface CreateEmployeeFormProps {
   onCreate: (employee: Employee) => void;
@@ -13,7 +15,7 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
     name: '',
     position: '',
     skills: '',
-    experience: '',
+    experience: 0,
     projects: '',
     email: '',
     phone: '',
@@ -22,31 +24,44 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
     reportsSubmitted: '',
     projectsInvolved: '',
   });
+  const [workSessions, setWorkSessions] = useState<WorkSession[]>([]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setNewEmployee({ ...newEmployee, [name]: value });
+  
+    setNewEmployee(prev => ({
+      ...prev,
+      [name]: name === 'experience' 
+  ? (value === '' ? '' : Number(value))  // дозволяємо порожній рядок
+  : value,
+    }));
   };
+  
+
+
+
+ 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const employee: Employee = {
-      id: Math.random(), // Replace with proper ID generation
+      id: Math.random(), 
       name: newEmployee.name,
       position: newEmployee.position,
-      skills: newEmployee.skills.split(',').map((s) => s.trim()),
+      skills: newEmployee.skills.split(',').map((s) => s.trim()).filter(Boolean),
       experience: newEmployee.experience,
-      projects: newEmployee.projects.split(',').map((p) => p.trim()),
+      projects: newEmployee.projects.split(',').map((p) => p.trim()).filter(Boolean),
       email: newEmployee.email,
       phone: newEmployee.phone,
       bio: newEmployee.bio,
       stats: {
         hoursWorked: Number(newEmployee.hoursWorked) || 0,
         reportsSubmitted: Number(newEmployee.reportsSubmitted) || 0,
-        projectsInvolved: Number(newEmployee.projectsInvolved) || 0,
+        projectsInvolved: Number(newEmployee.projectsInvolved) || newEmployee.projects.split(',').filter(Boolean).length || 0,
       },
+      recentWorkSessions: workSessions,
     };
     onCreate(employee);
     setIsOpen(false);
@@ -54,7 +69,7 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
       name: '',
       position: '',
       skills: '',
-      experience: '',
+      experience: 0,
       projects: '',
       email: '',
       phone: '',
@@ -63,6 +78,7 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
       reportsSubmitted: '',
       projectsInvolved: '',
     });
+    setWorkSessions([]);
   };
 
   return (
@@ -89,27 +105,36 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
             onChange={handleInputChange}
             required
           />
-          <FormField
-            label="Навички (через кому):"
+         <div className="flex flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+          <label className="block p-2 text-sm font-medium text-gray-700 mb-1">Навички</label>
+          <Select
+            isMulti
             name="skills"
-            value={newEmployee.skills}
-            onChange={handleInputChange}
-            placeholder="React, TypeScript"
-          />
+            options={techOptions}
+            className="basic-multi-select px-2"
+            placeholder="Вибрати навички"
+            classNamePrefix="select"
+            value={techOptions.filter(option =>
+              newEmployee.skills.split(',').includes(option.value)
+            )}
+            onChange={(selectedOptions) =>
+              setNewEmployee({
+                ...newEmployee,
+                skills: selectedOptions ? selectedOptions.map(opt => opt.value).join(', ') : '',
+              })
+            }
+            />
+          </div>
           <FormField
             label="Досвід:"
             name="experience"
-            value={newEmployee.experience}
+            value={newEmployee.experience.toString()}
             onChange={handleInputChange}
-            placeholder="5 years"
+            placeholder="5"
+            type="number"
           />
-          <FormField
-            label="Проєкти (через кому):"
-            name="projects"
-            value={newEmployee.projects}
-            onChange={handleInputChange}
-            placeholder="E-Commerce Platform"
-          />
+
+
           <FormField
             label="Email:"
             name="email"
@@ -125,36 +150,13 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
             type="tel"
           />
           <FormField
-            label="Біо:"
+            label="Біографія:"
             name="bio"
             value={newEmployee.bio}
             onChange={handleInputChange}
             textarea
           />
-          <FormField
-            label="Загальні години:"
-            name="hoursWorked"
-            value={newEmployee.hoursWorked}
-            onChange={handleInputChange}
-            type="number"
-            placeholder="40"
-          />
-          <FormField
-            label="Звіти подано:"
-            name="reportsSubmitted"
-            value={newEmployee.reportsSubmitted}
-            onChange={handleInputChange}
-            type="number"
-            placeholder="1"
-          />
-          <FormField
-            label="Проєктів залучено:"
-            name="projectsInvolved"
-            value={newEmployee.projectsInvolved}
-            onChange={handleInputChange}
-            type="number"
-            placeholder="1"
-          />
+        
           <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
