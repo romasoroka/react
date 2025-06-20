@@ -54,3 +54,7 @@ export interface Project {
     hours: number; // Hours worked
     description: string; // Work description
   }
+
+  export interface WorkSessionWithEmployee extends WorkSession {
+    employee?: string;
+  }

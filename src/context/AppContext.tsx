@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { Project, Employee } from '../types';
-import { initialProjects } from '../data/Projects';
-import { initialEmployees } from '../data/Employees';
+import { initialProjects } from '../data/projects';
+import { initialEmployees } from '../data/employees';
 
 interface AppContextType {
   projects: Project[];

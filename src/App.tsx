@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
-import Sidebar from './components/Sidebar';
-import Header from './components/Header';
+import Sidebar from './components/sidebar';
+import Header from './components/header';
 import Projects from './components/projects/Projects';
 import ProjectDetails from './components/projects/ProjectDetails';
 import Employees from './components/employees/Employees';

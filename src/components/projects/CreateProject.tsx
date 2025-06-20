@@ -1,12 +1,12 @@
-import { useState } from 'react';
+import { useState, FormEvent, ChangeEvent } from 'react';
 import Select from 'react-select';
 import Modal from '../ui/Modal';
 import FormField from '../ui/FormField';
 import { Project, Credential } from '../../types';
-import { techOptions } from '../../data/techOptions';
-import { initialEmployees } from '../../data/Employees';
-
-
+import { initialEmployees } from '../../data/employees';
+import { initialProjectFormData, ProjectFormData } from '../../data/initialProjectFormData';
+import TechnologiesSelect from '../ui/TechnologiesSelect';
+import ProgrammersSelect from '../ui/ProgrammersSelect';
 
 interface CreateProjectFormProps {
   onCreate: (project: Project) => void;
@@ -14,38 +14,23 @@ interface CreateProjectFormProps {
 
 const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [newProject, setNewProject] = useState({
-    name: '',
-    status: 'Active',
-    technologies: [] as string[], 
-    description: '',
-    programmers: [] as string[],
-    startDate: '',
-    endDate: '',
-    budget: '',
-    client: '',
-    detailedDescription: '',
-    hoursLogged: '',
-    reports: '',
-  });
+  const [newProject, setNewProject] = useState<ProjectFormData>(initialProjectFormData);
   const [credentials, setCredentials] = useState<Credential[]>([]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setNewProject({ ...newProject, [name]: value });
   };
 
-
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const project: Project = {
-      id: Math.random(), 
+      id: Date.now(), // More reliable than Math.random()
       name: newProject.name,
       status: newProject.status,
-      technologies: newProject.technologies, 
+      technologies: newProject.technologies,
       description: newProject.description,
       programmers: newProject.programmers,
       startDate: newProject.startDate,
@@ -61,20 +46,7 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
     };
     onCreate(project);
     setIsOpen(false);
-    setNewProject({
-      name: '',
-      status: 'Active',
-      technologies: [] as string[], 
-      description: '',
-      programmers: [] as string[],
-      startDate: '',
-      endDate: '',
-      budget: '',
-      client: '',
-      detailedDescription: '',
-      hoursLogged: '',
-      reports: '',
-    });
+    setNewProject(initialProjectFormData); // Reset to initial state
     setCredentials([]);
   };
 
@@ -95,7 +67,7 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
             onChange={handleInputChange}
             required
           />
-          <div className="flex flex-col  p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+          <div className="flex flex-col p-3 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
             <label className="text-sm font-semibold text-gray-800">Статус:</label>
             <select
               name="status"
@@ -108,28 +80,10 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
               <option value="Completed">Completed</option>
             </select>
           </div>
-          <div className="flex flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
-          <label className="block p-2 text-sm font-medium text-gray-700 mb-1">Технології</label>
-          <Select
-            isMulti
-            name="technologies"
-            options={techOptions}
-            className="basic-multi-select px-2"
-            placeholder="Вибрати технології"
-            classNamePrefix="select"
-            value={techOptions.filter(option =>
-              newProject.technologies.includes(option.value)
-            )}
-            onChange={(selectedOptions) =>
-              setNewProject({
-                ...newProject,
-                technologies: selectedOptions.map((opt) => opt.value),
-              })
-            }
+          <TechnologiesSelect
+            selected={newProject.technologies}
+            onChange={(values) => setNewProject({ ...newProject, technologies: values })}
           />
-          </div>
-          
-
           <FormField
             label="Короткий опис:"
             name="description"
@@ -137,33 +91,11 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
             onChange={handleInputChange}
             textarea
           />
-           <div className="flex flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
-          <label className="block p-2 text-sm font-medium text-gray-700 mb-1">Програмісти</label>
-          <Select
-            isMulti
-            name="programmers"
-            options={initialEmployees.map(emp => ({
-              value: emp.name,
-              label: emp.name,
-            }))}
-            className="basic-multi-select px-2"
-            placeholder="Вибрати технології"
-            classNamePrefix="select"
-            value={initialEmployees
-              .filter(emp => newProject.programmers.includes(emp.name))
-              .map(emp => ({ value: emp.name, label: emp.name }))}
-            onChange={(selectedOptions) =>
-              setNewProject({
-                ...newProject,
-                programmers: selectedOptions
-                  ? selectedOptions.map((opt) => opt.value)
-                  : [],
-              })
-            }
+          <ProgrammersSelect
+            selected={newProject.programmers}
+            employees={initialEmployees}
+            onChange={(values) => setNewProject({ ...newProject, programmers: values })}
           />
-
-          </div>
-         
           <FormField
             label="Дата початку:"
             name="startDate"
@@ -198,12 +130,11 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
             onChange={handleInputChange}
             textarea
           />
-
           <button
             type="submit"
             className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
           >
-            Створити
+            Створи
           </button>
         </form>
       </Modal>
