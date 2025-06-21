@@ -243,7 +243,7 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
         onClose={() => setIsAddCredentialOpen(false)}
         title="Додати опублікові дані"
       >
-        <form onSubmit={handleAddCredential} className="flex flex-col gap-2">
+        <form onSubmit={handleAddCredential} className="flex flex-col">
             <FormField
             label="Назва:"
             name="name"
@@ -281,7 +281,7 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
         onClose={() => setIsAddSessionModalOpen(false)}
         title="Додати робочу сесію"
       >
-        <form onSubmit={handleAddSession} className="flex flex-col gap-4">
+        <form onSubmit={handleAddSession} className="flex flex-col">
           <FormField
             label="Дата:"
             name="date"

@@ -4,6 +4,7 @@ import { Employee, Project, WorkSession } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
+import { formatYears } from '../../components/utils/formatDate';
 
 interface EmployeeDetailsTabsProps {
   employee: Employee;
@@ -131,8 +132,9 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
           </div>
           <div className="p-2 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
             <span className="text-sm font-semibold text-gray-800">Досвід:</span>
-            <span className="text-sm text-gray-600 ml-2">{employee.experience}</span>
+            <span className="text-sm text-gray-600 ml-2">{formatYears(employee.experience)}</span>
           </div>
+
           <div className="p-2 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
             <span className="text-sm font-semibold text-gray-800">Email:</span>
             <span className="text-sm text-gray-600 ml-2">{employee.email}</span>

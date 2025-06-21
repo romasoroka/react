@@ -25,7 +25,7 @@ const ProjectSessionsTab = ({
         <h3 className="text-sm font-semibold text-gray-800">Останні робочі сесії</h3>
         <button
           onClick={onAddClick}
-          className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-blue-700 transition-colors"
+          className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
         >
           Додати сесію
         </button>

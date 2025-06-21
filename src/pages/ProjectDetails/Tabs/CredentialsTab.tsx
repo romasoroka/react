@@ -47,7 +47,7 @@ const ProjectCredentialsTab = ({
         <button
           type="button"
           onClick={() => setIsAddCredentialOpen(true)}
-          className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-blue-700 transition-colors mt-2 w-fit"
+          className="bg-blue-600 text-white px-3 py-1 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors mt-2 w-fit"
         >
           Додати облікові дані
         </button>

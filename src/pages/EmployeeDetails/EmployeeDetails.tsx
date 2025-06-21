@@ -29,9 +29,26 @@ const EmployeeDetails = () => {
 
   return (
     <div className="max-w-7xl mx-auto mt-2 bg-white rounded-xl shadow-2xl p-6">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6 border-b-2 border-gray-200 pb-2 md:text-2xl">
-        👤 {employee.name}
-      </h2>
+      <div className="flex items-center gap-4 mb-6 border-b-2 border-gray-200 pb-2">
+        {/* Аватар */}
+        {employee.image ? (
+          <img
+            src={employee.image}
+            alt={employee.name}
+            className="w-12 h-12 rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-12 h-12 rounded-full bg-gray-300 flex items-center justify-center text-white text-sm font-semibold">
+            {employee.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+          </div>
+        )}
+
+        {/* Ім’я */}
+        <h2 className="text-3xl font-bold text-gray-800 md:text-2xl">
+          {employee.name}
+        </h2>
+      </div>
+
       <EmployeeDetailsTabs employee={employee} projects={projects} />
     </div>
   );
