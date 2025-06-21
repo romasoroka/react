@@ -8,7 +8,7 @@ interface Props {
 }
 
 const ProgrammersSelect = ({ selected, employees, onChange }: Props) => (
-  <div className="flex flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+  <div className="flex flex-col py-2 rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
     <label className="block p-2 text-sm font-medium text-gray-700 mb-1">Програмісти</label>
     <Select
       isMulti

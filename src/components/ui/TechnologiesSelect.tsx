@@ -7,7 +7,7 @@ interface Props {
 }
 
 const TechnologiesSelect = ({ selected, onChange }: Props) => (
-  <div className="flex mb-2 flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
+  <div className="flex mb-2 py-2 flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
     <label className="block p-2 text-sm font-medium text-gray-700 mb-1">Технології</label>
     <Select
       isMulti

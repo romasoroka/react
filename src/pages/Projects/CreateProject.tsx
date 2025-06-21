@@ -1,12 +1,12 @@
 import { useState, FormEvent, ChangeEvent } from 'react';
 import Select from 'react-select';
-import Modal from '../ui/Modal';
-import FormField from '../ui/FormField';
+import Modal from '../../components/ui/Modal';
+import FormField from '../../components/ui/FormField';
 import { Project, Credential } from '../../types';
 import { initialEmployees } from '../../data/employees';
 import { initialProjectFormData, ProjectFormData } from '../../data/initialProjectFormData';
-import TechnologiesSelect from '../ui/TechnologiesSelect';
-import ProgrammersSelect from '../ui/ProgrammersSelect';
+import TechnologiesSelect from '../../components/ui/TechnologiesSelect';
+import ProgrammersSelect from '../../components/ui/ProgrammersSelect';
 
 interface CreateProjectFormProps {
   onCreate: (project: Project) => void;
@@ -27,7 +27,7 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const project: Project = {
-      id: Date.now(), // More reliable than Math.random()
+      id: Date.now(), 
       name: newProject.name,
       status: newProject.status,
       technologies: newProject.technologies,
@@ -38,7 +38,7 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
       budget: newProject.budget,
       client: newProject.client,
       detailedDescription: newProject.detailedDescription,
-      credentials: credentials.filter((c) => c.key.trim() !== ''),
+      credentials: credentials,
       analytics: {
         hoursLogged: Number(newProject.hoursLogged) || 0,
         reports: Number(newProject.reports) || 0,
@@ -46,7 +46,7 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
     };
     onCreate(project);
     setIsOpen(false);
-    setNewProject(initialProjectFormData); // Reset to initial state
+    setNewProject(initialProjectFormData); 
     setCredentials([]);
   };
 

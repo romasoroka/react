@@ -17,13 +17,11 @@ export const initialProjects: Project[] = [
     credentials: [
       {
         name: 'Username/Password',
-        key: 'admin',
         value: 'securePass123',
         description: 'Admin account for backend dashboard',
       },
       {
         name: 'API Key',
-        key: 'stripe_api_key',
         value: 'sk_test_123456789',
         description: 'Stripe payment integration',
       },
@@ -49,9 +47,7 @@ export const initialProjects: Project[] = [
     credentials: [
       {
         name: 'Database URL',
-        key: 'mongo_uri',
         value: 'mongodb://localhost:27017/chatbot',
-        description: 'MongoDB connection for chatbot data',
       },
     ],
     analytics: {

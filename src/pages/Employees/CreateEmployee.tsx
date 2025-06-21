@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import Select from 'react-select';
-import Modal from '../ui/Modal';
-import FormField from '../ui/FormField';
+import Modal from '../../components/ui//Modal';
+import FormField from '../../components/ui/FormField';
 import { Employee, WorkSession } from '../../types';
 import { techOptions } from '../../data/techOptions';
 

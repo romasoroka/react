@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Employee, Project, WorkSession } from '../../types';
 import { useAppContext } from '../../context/AppContext';
-import Modal from '../ui/Modal';
-import FormField from '../ui/FormField';
+import Modal from '../../components/ui/Modal';
+import FormField from '../../components/ui/FormField';
 
 interface EmployeeDetailsTabsProps {
   employee: Employee;

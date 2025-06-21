@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Project } from '../../types';
-import Card from '../ui/Card';
+import Card from '../../components/ui/Card';
 
 interface ProjectsProps {
   projects: Project[];

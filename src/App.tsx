@@ -2,9 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import Sidebar from './components/sidebar';
 import Header from './components/header';
-import Projects from './components/projects/Projects';
-import ProjectDetails from './components/projects/ProjectDetails';
-import Employees from './components/employees/Employees';
+import Projects from './pages/Projects/Projects';
+import ProjectDetails from './pages/ProjectDetails/ProjectDetails';
+import Employees from './pages/Employees/Employees';
+import EmployeeDetails from './pages/EmployeeDetails/EmployeeDetails'; 
 
 const App = () => {
   return (
@@ -28,6 +29,7 @@ const App = () => {
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/projects/:id" element={<ProjectDetails />} />
                 <Route path="/employees" element={<Employees />} />
+                <Route path="/employees/:id" element={<EmployeeDetails />} />
                 <Route
                   path="/analytics"
                   element={

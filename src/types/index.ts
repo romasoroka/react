@@ -1,6 +1,5 @@
 export interface Credential {
   name: string; // e.g., "Username/Password", "API Key", "Database URL"
-  key: string; // e.g., username, API key, URL
   value?: string; // e.g., password, secret value (optional for non-sensitive keys)
   description?: string; // Optional context (e.g., "Admin account for server")
 }
@@ -58,3 +57,5 @@ export interface Project {
   export interface WorkSessionWithEmployee extends WorkSession {
     employee?: string;
   }
+
+  
