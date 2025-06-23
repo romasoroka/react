@@ -3,6 +3,7 @@ import { Project, Employee } from '../types';
 import { initialProjects } from '../data/projects';
 import { initialEmployees } from '../data/employees';
 
+
 interface AppContextType {
   projects: Project[];
   addProject: (project: Project) => void;

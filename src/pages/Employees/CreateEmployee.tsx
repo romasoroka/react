@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Select from 'react-select';
+import SelectComponent from '../../components/ui/SelectComponents';
 import Modal from '../../components/ui//Modal';
 import FormField from '../../components/ui/FormField';
 import { Employee, WorkSession } from '../../types';
@@ -34,7 +35,7 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
     setNewEmployee(prev => ({
       ...prev,
       [name]: name === 'experience' 
-  ? (value === '' ? '' : Number(value))  // дозволяємо порожній рядок
+  ? (value === '' ? '' : Number(value))  
   : value,
     }));
   };
@@ -105,26 +106,18 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
             onChange={handleInputChange}
             required
           />
-         <div className="flex flex-col rounded-lg bg-white/50 hover:bg-gray-100/80 transition-colors">
-          <label className="block p-2 text-sm font-medium text-gray-700 mb-1">Навички</label>
-          <Select
-            isMulti
-            name="skills"
+           <SelectComponent
+            label="Навички"
             options={techOptions}
-            className="basic-multi-select px-2"
-            placeholder="Вибрати навички"
-            classNamePrefix="select"
-            value={techOptions.filter(option =>
-              newEmployee.skills.split(',').includes(option.value)
-            )}
-            onChange={(selectedOptions) =>
+            selected={newEmployee.skills.split(',').map(s => s.trim()).filter(Boolean)}
+            onChange={(values) =>
               setNewEmployee({
                 ...newEmployee,
-                skills: selectedOptions ? selectedOptions.map(opt => opt.value).join(', ') : '',
+                skills: values.join(', '),
               })
             }
-            />
-          </div>
+          />
+
           <FormField
             label="Досвід:"
             name="experience"
