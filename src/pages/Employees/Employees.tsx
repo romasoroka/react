@@ -5,12 +5,20 @@ import EmployeeList from './EmployeeList';
 import { useAppContext } from '../../context/AppContext';
 
 const Employees = () => {
-  const { employees, addEmployee } = useAppContext();
+  const { employees, addEmployee, loading, error } = useAppContext();
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredEmployees = employees.filter((employee) =>
     employee.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  if (loading) {
+    return <div className="text-center text-gray-500 dark:text-gray-400">Завантаження...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
 
   return (
     <div className="max-w-6xl mt-4 mx-auto rounded-2xl p-8 md:p-4 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">

@@ -1,8 +1,7 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Project, Employee } from '../types';
 import { initialProjects } from '../data/projects';
-import { initialEmployees } from '../data/employees';
-
+import { fetchEmployees, createEmployee, fetchProjects } from '../services';
 
 interface AppContextType {
   projects: Project[];
@@ -10,25 +9,15 @@ interface AppContextType {
   updateProject: (id: number, project: Project) => void;
   deleteProject: (id: number) => void;
   employees: Employee[];
-  addEmployee: (employee: Employee) => void;
+  addEmployee: (employee: Omit<Employee, 'id'>) => Promise<void>; 
   updateEmployee: (id: number, employee: Employee) => void;
+  loading: boolean;
+  error: string | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  // Migrate employees
-  const migratedEmployees = initialEmployees.map((employee) => ({
-    ...employee,
-    stats: employee.stats || {
-      hoursWorked: 0,
-      reportsSubmitted: 0,
-      projectsInvolved: employee.projects.length || 0,
-    },
-    recentWorkSessions: employee.recentWorkSessions || [],
-  }));
-
-  // Migrate projects
   const migratedProjects = initialProjects.map((project) => ({
     ...project,
     analytics: project.analytics || {
@@ -38,7 +27,33 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }));
 
   const [projects, setProjects] = useState<Project[]>(migratedProjects);
-  const [employees, setEmployees] = useState<Employee[]>(migratedEmployees);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadEmployees = async () => {
+      try {
+        const data = await fetchEmployees();
+        const migratedEmployees = data.map((employee) => ({
+          ...employee,
+          stats: employee.stats || {
+            hoursWorked: 0,
+            reportsSubmitted: 0,
+            projectsInvolved: employee.projects?.length || 0,
+          },
+          recentWorkSessions: employee.recentWorkSessions || [],
+        }));
+        setEmployees(migratedEmployees);
+        setLoading(false);
+      } catch (err) {
+        setError('Не вдалося завантажити працівників');
+        setLoading(false);
+        console.error('Error loading employees:', err);
+      }
+    };
+    loadEmployees();
+  }, []);
 
   const addProject = (project: Project) => {
     setProjects([...projects, { ...project, id: projects.length + 1 }]);
@@ -51,7 +66,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const deleteProject = (id: number) => {
     const project = projects.find((p) => p.id === id);
     if (project) {
-      // Remove project from employees
       setEmployees(
         employees.map((employee) => {
           if (employee.projects.includes(project.name)) {
@@ -69,8 +83,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setProjects(projects.filter((p) => p.id !== id));
   };
 
-  const addEmployee = (employee: Employee) => {
-    setEmployees([...employees, { ...employee, id: employees.length + 1 }]);
+  const addEmployee = async (employee: Omit<Employee, 'id'>) => {
+    try {
+      const newEmployee = await createEmployee(employee);
+      setEmployees((prev) => [...prev, {
+        ...newEmployee,
+        stats: newEmployee.stats || {
+          hoursWorked: 0,
+          reportsSubmitted: 0,
+          projectsInvolved: newEmployee.projects?.length || 0,
+        },
+        recentWorkSessions: newEmployee.recentWorkSessions || [],
+      }]);
+    } catch (err) {
+      setError('Error adding employee');
+      console.error('Error adding employee:', err);
+      throw err; 
+    }
   };
 
   const updateEmployee = (id: number, updatedEmployee: Employee) => {
@@ -79,7 +108,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AppContext.Provider
-      value={{ projects, addProject, updateProject, deleteProject, employees, addEmployee, updateEmployee }}
+      value={{ projects, addProject, updateProject, deleteProject, employees, addEmployee, updateEmployee, loading, error }}
     >
       {children}
     </AppContext.Provider>

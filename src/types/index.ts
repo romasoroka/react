@@ -1,12 +1,12 @@
 export interface Credential {
-  name: string; // e.g., "Username/Password", "API Key", "Database URL"
-  value?: string; // e.g., password, secret value (optional for non-sensitive keys)
-  description?: string; // Optional context (e.g., "Admin account for server")
+  name: string; 
+  value?: string;
+  description?: string;
 }
 
 export interface ProjectAnalytics {
-  hoursLogged: number; // Total hours logged on the project
-  reports: number; // Number of reports submitted
+  hoursLogged: number; 
+  reports: number; 
 }
 
 export interface Project {
@@ -22,7 +22,7 @@ export interface Project {
   client: string;
   detailedDescription: string;
   credentials?: Credential[];
-  analytics: ProjectAnalytics; // New field for analytics
+  analytics: ProjectAnalytics; 
 }
   
   export interface EmployeeStats {
@@ -43,15 +43,15 @@ export interface Project {
     bio: string;
     stats: EmployeeStats;
     image?: string; 
-    recentWorkSessions?: WorkSession[]; // New field
+    recentWorkSessions?: WorkSession[]; 
   }
 
   export interface WorkSession {
     id: number;
-    date: string; // e.g., "2024-06-14"
-    project: string; // Project name
-    hours: number; // Hours worked
-    description: string; // Work description
+    date: string; 
+    project: string; 
+    hours: number; 
+    description: string; 
   }
 
   export interface WorkSessionWithEmployee extends WorkSession {

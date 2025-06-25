@@ -20,7 +20,7 @@ const ProjectSessionsTab = ({
   formatDate,
 }: ProjectSessionsTabProps) => {
   return (
-    <div className="flex flex-col m-2 gap-4 animate-slideIn bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+    <div className="flex flex-col m-2 gap-4 animate-slideIn bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100">
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Останні робочі сесії</h3>
         <button

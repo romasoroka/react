@@ -1,85 +1,75 @@
 import { useState } from 'react';
 import Select from 'react-select';
 import SelectComponent from '../../components/ui/SelectComponents';
-import Modal from '../../components/ui//Modal';
+import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import { Employee, WorkSession } from '../../types';
 import { techOptions } from '../../data/techOptions';
 
 interface CreateEmployeeFormProps {
-  onCreate: (employee: Employee) => void;
+  onCreate: (employee: Omit<Employee, 'id'>) => Promise<void>; // Fixed signature
 }
 
 const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [newEmployee, setNewEmployee] = useState({
+  const [newEmployee, setNewEmployee] = useState<Omit<Employee, 'id'>>({
     name: '',
     position: '',
-    skills: '',
+    skills: [],
     experience: 0,
-    projects: '',
+    projects: [],
     email: '',
     phone: '',
     bio: '',
-    hoursWorked: '',
-    reportsSubmitted: '',
-    projectsInvolved: '',
+    stats: { hoursWorked: 0, reportsSubmitted: 0, projectsInvolved: 0 },
+    recentWorkSessions: [],
   });
-  const [workSessions, setWorkSessions] = useState<WorkSession[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-  
-    setNewEmployee(prev => ({
+    setNewEmployee((prev) => ({
       ...prev,
-      [name]: name === 'experience' 
-  ? (value === '' ? '' : Number(value))  
-  : value,
+      [name]: name === 'experience' ? (value === '' ? 0 : Number(value)) : value,
     }));
   };
-  
 
-
-
- 
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const employee: Employee = {
-      id: Math.random(), 
-      name: newEmployee.name,
-      position: newEmployee.position,
-      skills: newEmployee.skills.split(',').map((s) => s.trim()).filter(Boolean),
-      experience: newEmployee.experience,
-      projects: newEmployee.projects.split(',').map((p) => p.trim()).filter(Boolean),
-      email: newEmployee.email,
-      phone: newEmployee.phone,
-      bio: newEmployee.bio,
-      stats: {
-        hoursWorked: Number(newEmployee.hoursWorked) || 0,
-        reportsSubmitted: Number(newEmployee.reportsSubmitted) || 0,
-        projectsInvolved: Number(newEmployee.projectsInvolved) || newEmployee.projects.split(',').filter(Boolean).length || 0,
-      },
-      recentWorkSessions: workSessions,
-    };
-    onCreate(employee);
-    setIsOpen(false);
-    setNewEmployee({
-      name: '',
-      position: '',
-      skills: '',
-      experience: 0,
-      projects: '',
-      email: '',
-      phone: '',
-      bio: '',
-      hoursWorked: '',
-      reportsSubmitted: '',
-      projectsInvolved: '',
-    });
-    setWorkSessions([]);
+    setIsSubmitting(true);
+    try {
+      const employee: Omit<Employee, 'id'> = {
+        ...newEmployee,
+        skills: newEmployee.skills, // Already an array from SelectComponent
+        projects: newEmployee.projects, // Already an array
+        stats: {
+          hoursWorked: newEmployee.stats.hoursWorked || 0,
+          reportsSubmitted: newEmployee.stats.reportsSubmitted || 0,
+          projectsInvolved: newEmployee.projects.length || 0,
+        },
+      };
+      console.log('Form Data:', employee); // Debug
+      await onCreate(employee);
+      setIsOpen(false);
+      setNewEmployee({
+        name: '',
+        position: '',
+        skills: [],
+        experience: 0,
+        projects: [],
+        email: '',
+        phone: '',
+        bio: '',
+        stats: { hoursWorked: 0, reportsSubmitted: 0, projectsInvolved: 0 },
+        recentWorkSessions: [],
+      });
+    } catch (err) {
+      console.error('Form Submission Error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -106,18 +96,17 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
             onChange={handleInputChange}
             required
           />
-           <SelectComponent
+          <SelectComponent
             label="Навички"
             options={techOptions}
-            selected={newEmployee.skills.split(',').map(s => s.trim()).filter(Boolean)}
+            selected={newEmployee.skills}
             onChange={(values) =>
               setNewEmployee({
                 ...newEmployee,
-                skills: values.join(', '),
+                skills: values, // Store as array
               })
             }
           />
-
           <FormField
             label="Досвід:"
             name="experience"
@@ -126,14 +115,13 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
             placeholder="5"
             type="number"
           />
-
-
           <FormField
             label="Email:"
             name="email"
             value={newEmployee.email}
             onChange={handleInputChange}
             type="email"
+            required
           />
           <FormField
             label="Телефон:"
@@ -149,12 +137,12 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
             onChange={handleInputChange}
             textarea
           />
-        
           <button
             type="submit"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+            disabled={isSubmitting}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400"
           >
-            Створити
+            {isSubmitting ? 'Створення...' : 'Створити'}
           </button>
         </form>
       </Modal>

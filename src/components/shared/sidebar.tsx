@@ -2,25 +2,22 @@ import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { FcSettings, FcComboChart, FcBriefcase, FcBusinessman, FcLineChart } from 'react-icons/fc';
 import { FaBars, FaUserCircle, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { useSidebarContext } from '../../context/SidebarContext';
 
 const Sidebar = ({ userName = 'Роман', isAdmin = true }) => {
-  const [isOpen, setIsOpen] = useState(false); // Для мобільного меню
-  const [isCollapsed, setIsCollapsed] = useState(false); // Для звуження сайдбару
+  const [isOpen, setIsOpen] = useState(false);
+  const { isCollapsed, toggleCollapse } = useSidebarContext();
 
   const toggleSidebar = () => setIsOpen(!isOpen);
-  const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
   return (
     <>
-      {/* Кнопка для мобільного меню */}
       <button
         className="fixed top-4 left-4 z-20 bg-blue-600 text-white px-4 py-2 rounded-lg text-base cursor-pointer md:hidden"
         onClick={toggleSidebar}
       >
         {(FaBars as any)({ size: 20 })}
       </button>
-
-      {/* Сайдбар */}
       <div
         className={`fixed top-0 left-0 ${
           isCollapsed ? 'w-16' : 'w-60'
@@ -28,13 +25,13 @@ const Sidebar = ({ userName = 'Роман', isAdmin = true }) => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } md:translate-x-0 overflow-hidden`}
       >
-        {/* Частина 1: Заголовок */}
-        <div className={`mb-8 flex items-center justify-between px-6 pt-6 ${isCollapsed ? 'hidden' : ''}`}>
-          <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {(FcSettings as any)({ size: 24 })}
-            Company Operations
-          </h1>
-          {/* Кнопка звуження (тільки для десктопу) */}
+        <div className="mb-8 flex items-center justify-between px-6 pt-6">
+          {!isCollapsed && (
+            <h1 className="flex items-center gap-3 text-2xl font-bold text-gray-900 dark:text-gray-100">
+              {(FcSettings as any)({ size: 24 })}
+              Робота з компанією
+            </h1>
+          )}
           <button
             className="hidden md:block text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
             onClick={toggleCollapse}
@@ -42,8 +39,6 @@ const Sidebar = ({ userName = 'Роман', isAdmin = true }) => {
             {(isCollapsed ? FaChevronRight : FaChevronLeft as any)({ size: 20 })}
           </button>
         </div>
-
-        {/* Частина 2: Навігація */}
         <nav className="flex flex-col gap-2 flex-1 px-2">
           <h2
             className={`text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 px-4 ${
@@ -65,7 +60,7 @@ const Sidebar = ({ userName = 'Роман', isAdmin = true }) => {
             }
           >
             {(FcComboChart as any)({ size: 20 })}
-            <span className={isCollapsed ? 'hidden' : ''}>Dashboard</span>
+            <span className={isCollapsed ? 'hidden' : ''}>Панель приладів</span>
           </NavLink>
           <NavLink
             to="/projects"
@@ -80,7 +75,7 @@ const Sidebar = ({ userName = 'Роман', isAdmin = true }) => {
             }
           >
             {(FcBriefcase as any)({ size: 20 })}
-            <span className={isCollapsed ? 'hidden' : ''}>Projects</span>
+            <span className={isCollapsed ? 'hidden' : ''}>Проєкти</span>
           </NavLink>
           <NavLink
             to="/employees"
@@ -95,7 +90,7 @@ const Sidebar = ({ userName = 'Роман', isAdmin = true }) => {
             }
           >
             {(FcBusinessman as any)({ size: 20 })}
-            <span className={isCollapsed ? 'hidden' : ''}>Employees</span>
+            <span className={isCollapsed ? 'hidden' : ''}>Робітники</span>
           </NavLink>
           <NavLink
             to="/analytics"
@@ -110,11 +105,9 @@ const Sidebar = ({ userName = 'Роман', isAdmin = true }) => {
             }
           >
             {(FcLineChart as any)({ size: 20 })}
-            <span className={isCollapsed ? 'hidden' : ''}>Analytics</span>
+            <span className={isCollapsed ? 'hidden' : ''}>Аналітика</span>
           </NavLink>
         </nav>
-
-        {/* Частина 3: Футер */}
         <div
           className={`pt-2 border-t border-gray-200 dark:border-gray-700 px-4 py-2 ${isCollapsed ? 'hidden' : ''}`}
         >
@@ -123,7 +116,7 @@ const Sidebar = ({ userName = 'Роман', isAdmin = true }) => {
             <div className="flex flex-col">
               <span className="text-sm font-medium text-gray-600 dark:text-gray-200">{userName}</span>
               <span className="text-xs text-gray-500 dark:text-gray-400">
-                {isAdmin ? 'Admin' : 'User'}
+                {isAdmin ? 'Адміністратор' : 'Робітник'}
               </span>
             </div>
           </div>

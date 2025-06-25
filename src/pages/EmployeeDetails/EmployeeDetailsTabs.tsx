@@ -5,6 +5,8 @@ import { useAppContext } from '../../context/AppContext';
 import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import { formatYears } from '../../components/utils/formatDate';
+import InfoCard from '../../components/ui/InfoCard';
+
 
 interface EmployeeDetailsTabsProps {
   employee: Employee;
@@ -154,18 +156,19 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
           {employee.stats ? (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-                <div className="p-2 rounded-lg bg-blue-50 dark:bg-gray-900 text-center">
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{employee.stats.hoursWorked}</span>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Загальні години</p>
-                </div>
-                <div className="p-2 rounded-lg bg-blue-50 dark:bg-gray-900 text-center">
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{employee.stats.reportsSubmitted}</span>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Звіти подано</p>
-                </div>
-                <div className="p-2 rounded-lg bg-blue-50 dark:bg-gray-900 text-center">
-                  <span className="text-2xl font-bold text-blue-600 dark:text-blue-400">{employee.stats.projectsInvolved}</span>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Проєктів залучено</p>
-                </div>
+                
+              <InfoCard
+                value={employee.stats.hoursWorked}
+                label="Загальні години"
+              />
+              <InfoCard
+                value={employee.stats.reportsSubmitted}
+                label="Звіти подано"
+              />
+              <InfoCard
+                value={employee.stats.projectsInvolved}
+                label="Проєктів залучено"
+              />
               </div>
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-center">

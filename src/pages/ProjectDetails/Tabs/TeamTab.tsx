@@ -12,14 +12,14 @@ const ProjectTeamTab = ({ project, employees }: Props) => {
   });
 
   return (
-    <div className="flex flex-col animate-slideIn bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+    <div className="flex flex-col rounded-lg animate-slideIn bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100">
       {team.length > 0 ? (
         team.map((member, index) => {
           const employee = employees.find((e) => e.id === member.id || e.name === member.name);
           return (
             <div
               key={index}
-              className="flex items-center gap-3 p-2 rounded-lg bg-white/50 hover:bg-gray-100/80 dark:bg-gray-800/50 dark:hover:bg-gray-700/80 transition-colors"
+              className="flex items-center gap-3 p-2 rounded-lg bg-white/50 hover:bg-gray-100/80 dark:bg-gray-800 dark:hover:bg-gray-700/80 transition-colors"
             >
               {employee?.image ? (
                 <img

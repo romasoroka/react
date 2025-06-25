@@ -1,17 +1,25 @@
 import { useState } from 'react';
 import { FaUserCircle, FaBell, FaUserShield } from 'react-icons/fa';
-import ThemeToggle from '../components/ui/ThemeButton';
+import ThemeToggle from '../ui/ThemeButton';
+import { useSidebarContext } from '../../context/SidebarContext';
 
 const Header = ({ isAdmin = true, userName = 'Roman' }) => {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { isCollapsed } = useSidebarContext();
 
   const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
 
   return (
-    <header className="fixed top-0 left-60 right-0 h-16 bg-white dark:bg-gray-900 shadow-sm flex items-center justify-between px-6 md:px-4 z-50">
+    <header
+    className={`fixed top-0 h-16 bg-white dark:bg-gray-900 shadow-sm flex items-center justify-between px-6 md:px-4 z-50 transition-all duration-300 ease-in-out ${
+      isCollapsed
+        ? 'ml-20 w-[calc(100%-5rem)]'  
+        : 'ml-60 w-[calc(100%-15rem)]' 
+    }`}
+    >
       <div className="flex items-center">
         <span className="text-xl font-semibold text-gray-800 dark:text-gray-100 md:text-base">
-          Welcome back, {userName}
+          З поверненням, {userName}
         </span>
       </div>
       <div className="flex items-center gap-6 md:gap-3">

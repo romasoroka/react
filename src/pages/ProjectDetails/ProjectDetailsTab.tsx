@@ -28,7 +28,7 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
     hours: '',
     description: '',
   });
-  const { updateProject, deleteProject, updateEmployee } = useAppContext();
+  const {  updateEmployee } = useAppContext();
   const navigate = useNavigate();
 
   const toggleValue = (index: number) => {
@@ -48,7 +48,6 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
       ...project,
       credentials: [...(project.credentials ?? []), newCredential],
     };
-    updateProject(project.id, updatedProject);
     setIsAddCredentialOpen(false);
     setNewCredential({
       name: '',
@@ -98,7 +97,6 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
       },
     };
     updateEmployee(employee.id, updatedEmployee);
-    updateProject(project.id, updatedProject);
     setIsAddSessionModalOpen(false);
     setNewSession({ date: '', employee: '', hours: '', description: '' });
   };
@@ -148,7 +146,7 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
   };
 
   return (
-    <div className="flex flex-col gap-4  dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+    <div className="flex flex-col gap-4 rounded-lg  dark:bg-gray-800 text-gray-800 dark:text-gray-100">
       {/* Tab Navigation */}
       <div className="flex border-b border-gray-200 dark:border-gray-700">
         <button
