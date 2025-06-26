@@ -21,7 +21,7 @@ const Employees = () => {
   }
 
   return (
-    <div className="max-w-6xl mt-4 mx-auto rounded-2xl p-8 md:p-4 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
+    <div className="mt-4 mx-auto rounded-2xl p-8 md:p-4 bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100">
       <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center gap-2 md:text-2xl">
         👥 Працівники
       </h2>
