@@ -1,21 +1,76 @@
-import React from 'react';
-import { Project } from '../../../types';
+import React, { useState } from 'react';
+import { Project, Credential } from '../../../types';
+import { createCredential } from '../../../services/credentials';
+import Modal from '../../../components/ui/Modal';
+import FormField from '../../../components/ui/FormField';
 
 interface ProjectCredentialsTabProps {
   project: Project;
   showValues: { [key: number]: boolean };
   toggleValue: (index: number) => void;
-  setIsAddCredentialOpen: (val: boolean) => void;
+  onUpdateProject: (updatedProject: Project) => Promise<void>;
 }
 
 const ProjectCredentialsTab = ({
   project,
   showValues,
   toggleValue,
-  setIsAddCredentialOpen,
+  onUpdateProject,
 }: ProjectCredentialsTabProps) => {
+  const [isAddCredentialOpen, setIsAddCredentialOpen] = useState(false);
+  const [newCredential, setNewCredential] = useState<Omit<Credential, 'id'>>({
+    name: '',
+    value: '',
+    description: '',
+  });
+  const [error, setError] = useState<string | null>(null);
+
+  const handleCredentialChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setNewCredential({ ...newCredential, [name]: value });
+  };
+
+  const validateCredential = () => {
+    if (!newCredential.name.trim()) return 'Назва є обов’язковою';
+    if (!newCredential.value.trim()) return 'Значення є обов’язковим';
+    return null;
+  };
+
+  const handleAddCredential = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const validationError = validateCredential();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    try {
+      const addedCredential = await createCredential({
+        name: newCredential.name.trim(),
+        value: newCredential.value.trim(),
+        description: newCredential.description?.trim() || '',
+      });
+      const updatedProject = {
+        ...project,
+        credentials: [...(project.credentials ?? []), addedCredential],
+      };
+      await onUpdateProject(updatedProject);
+      setIsAddCredentialOpen(false);
+      setNewCredential({ name: '', value: '', description: '' });
+    } catch (err) {
+      setError(
+        'Помилка при створенні облікових даних: ' +
+          (err instanceof Error ? err.message : 'Невідома помилка')
+      );
+    }
+  };
+
   return (
-    <div className="flex rounded-lg flex-col animate-slideIn  dark:bg-gray-800 text-gray-800 dark:text-gray-100">
+    <div className="flex rounded-lg flex-col animate-slideIn dark:bg-gray-800 text-gray-800 dark:text-gray-100">
       <div className="flex flex-col gap-2 mt-2">
         {project.credentials && project.credentials.length > 0 ? (
           project.credentials.map((cred, index) => (
@@ -52,6 +107,49 @@ const ProjectCredentialsTab = ({
           Додати облікові дані
         </button>
       </div>
+      <Modal
+        isOpen={isAddCredentialOpen}
+        onClose={() => setIsAddCredentialOpen(false)}
+        title="Додати облікові дані"
+      >
+        <form
+          onSubmit={handleAddCredential}
+          className="flex flex-col bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100"
+        >
+          {error && (
+            <div className="mb-4 p-2 bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-200 rounded-lg text-sm">
+              {error}
+            </div>
+          )}
+          <FormField
+            label="Назва:"
+            name="name"
+            value={newCredential.name}
+            onChange={handleCredentialChange}
+            required
+          />
+          <FormField
+            label="Значення:"
+            name="value"
+            value={newCredential.value}
+            onChange={handleCredentialChange}
+            required
+          />
+          <FormField
+            label="Опис:"
+            name="description"
+            value={newCredential.description || ''}
+            onChange={handleCredentialChange}
+            textarea
+          />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
+          >
+            Додати
+          </button>
+        </form>
+      </Modal>
     </div>
   );
 };

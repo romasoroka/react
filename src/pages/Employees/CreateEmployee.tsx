@@ -3,36 +3,36 @@ import Select from 'react-select';
 import SelectComponent from '../../components/ui/SelectComponents';
 import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
-import { Employee, WorkSession } from '../../types';
-import { techOptions } from '../../data/techOptions';
+import { Employee } from '../../types';
+import { techOptions } from '../../data/initialData';
 
 interface CreateEmployeeFormProps {
-  onCreate: (employee: Omit<Employee, 'id'>) => Promise<void>; // Fixed signature
+  onCreate: (employee: Omit<Employee, 'id'>) => Promise<void>;
 }
 
 const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [newEmployee, setNewEmployee] = useState<Omit<Employee, 'id'>>({
-    name: '',
-    position: '',
+    fullName: '',
     skills: [],
-    experience: 0,
-    projects: [],
+    yearsOfExperience: 0,
+    projectIds: [],
     email: '',
     phone: '',
     bio: '',
-    stats: { hoursWorked: 0, reportsSubmitted: 0, projectsInvolved: 0 },
-    recentWorkSessions: [],
+    totalHoursWorked: 0,
+    reportsSubmitted: 0,
+    projectsInvolved: 0,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setNewEmployee((prev) => ({
       ...prev,
-      [name]: name === 'experience' ? (value === '' ? 0 : Number(value)) : value,
+      [name]: name === 'yearsOfExperience' ? (value === '' ? 0 : Number(value)) : value,
     }));
   };
 
@@ -42,28 +42,25 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
     try {
       const employee: Omit<Employee, 'id'> = {
         ...newEmployee,
-        skills: newEmployee.skills, // Already an array from SelectComponent
-        projects: newEmployee.projects, // Already an array
-        stats: {
-          hoursWorked: newEmployee.stats.hoursWorked || 0,
-          reportsSubmitted: newEmployee.stats.reportsSubmitted || 0,
-          projectsInvolved: newEmployee.projects.length || 0,
-        },
+        skills: newEmployee.skills,
+        projectIds: newEmployee.projectIds,
+        totalHoursWorked: newEmployee.totalHoursWorked || 0,
+        reportsSubmitted: newEmployee.reportsSubmitted || 0,
+        projectsInvolved: newEmployee.projectIds.length || 0,
       };
-      console.log('Form Data:', employee); // Debug
       await onCreate(employee);
       setIsOpen(false);
       setNewEmployee({
-        name: '',
-        position: '',
+        fullName: '',
         skills: [],
-        experience: 0,
-        projects: [],
+        yearsOfExperience: 0,
+        projectIds: [],
         email: '',
         phone: '',
         bio: '',
-        stats: { hoursWorked: 0, reportsSubmitted: 0, projectsInvolved: 0 },
-        recentWorkSessions: [],
+        totalHoursWorked: 0,
+        reportsSubmitted: 0,
+        projectsInvolved: 0,
       });
     } catch (err) {
       console.error('Form Submission Error:', err);
@@ -83,16 +80,9 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Створити нового працівника">
         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
           <FormField
-            label="Ім’я:"
-            name="name"
-            value={newEmployee.name}
-            onChange={handleInputChange}
-            required
-          />
-          <FormField
-            label="Посада:"
-            name="position"
-            value={newEmployee.position}
+            label="Повне ім’я:"
+            name="fullName"
+            value={newEmployee.fullName}
             onChange={handleInputChange}
             required
           />
@@ -103,14 +93,14 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
             onChange={(values) =>
               setNewEmployee({
                 ...newEmployee,
-                skills: values, // Store as array
+                skills: values,
               })
             }
           />
           <FormField
-            label="Досвід:"
-            name="experience"
-            value={newEmployee.experience.toString()}
+            label="Досвід (роки):"
+            name="yearsOfExperience"
+            value={newEmployee.yearsOfExperience.toString()}
             onChange={handleInputChange}
             placeholder="5"
             type="number"
@@ -126,14 +116,14 @@ const CreateEmployeeForm = ({ onCreate }: CreateEmployeeFormProps) => {
           <FormField
             label="Телефон:"
             name="phone"
-            value={newEmployee.phone}
+            value={newEmployee.phone || ''}
             onChange={handleInputChange}
             type="tel"
           />
           <FormField
             label="Біографія:"
             name="bio"
-            value={newEmployee.bio}
+            value={newEmployee.bio || ''}
             onChange={handleInputChange}
             textarea
           />

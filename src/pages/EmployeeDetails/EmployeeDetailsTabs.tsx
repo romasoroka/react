@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Employee, Project, WorkSession } from '../../types';
+import { Employee, Project, WorkSession, ProjectStatus } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import Modal from '../../components/ui/Modal';
 import FormField from '../../components/ui/FormField';
 import { formatYears } from '../../components/utils/formatDate';
 import InfoCard from '../../components/ui/InfoCard';
-
 
 interface EmployeeDetailsTabsProps {
   employee: Employee;
@@ -20,15 +19,14 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
   const [selectedSession, setSelectedSession] = useState<WorkSession | null>(null);
   const [newSession, setNewSession] = useState({
     date: '',
-    project: '',
-    hours: '',
-    description: '',
+    projectId: '',
+    startTime: '',
+    endTime: '',
+    taskDescription: '',
   });
   const { updateEmployee } = useAppContext();
 
-  const assignedProjects = projects.filter((project) =>
-    project.programmers.includes(employee.name)
-  );
+  const assignedProjects = projects.filter((p) => employee.projectIds.includes(p.id!));
 
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('uk-UA', {
@@ -44,36 +42,42 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
   };
 
   const handleSessionChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setNewSession({ ...newSession, [name]: value });
   };
 
-  const handleAddSession = (e: React.FormEvent) => {
+  const handleAddSession = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSession.date || !newSession.project || !newSession.hours) {
-      alert('Дата, проєкт і години є обов’язковими');
+    if (!newSession.date || !newSession.projectId || !newSession.startTime || !newSession.endTime) {
+      alert('Дата, проєкт, початковий і кінцевий час є обов’язковими');
       return;
     }
     const session: WorkSession = {
-      id: (employee.recentWorkSessions?.length || 0) + 1,
+      id: 0,
       date: newSession.date,
-      project: newSession.project,
-      hours: Number(newSession.hours),
-      description: newSession.description,
+      projectId: Number(newSession.projectId),
+      employeeId: employee.id ?? 0,
+      startTime: newSession.startTime,
+      endTime: newSession.endTime,
+      taskDescription: newSession.taskDescription,
     };
-    const updatedEmployee: Employee = {
-      ...employee,
-      recentWorkSessions: [...(employee.recentWorkSessions || []), session],
-      stats: {
-        ...employee.stats,
-        hoursWorked: (employee.stats.hoursWorked || 0) + session.hours,
-      },
-    };
-    updateEmployee(employee.id, updatedEmployee);
-    setIsAddSessionModalOpen(false);
-    setNewSession({ date: '', project: '', hours: '', description: '' });
+
+    try {
+      const response = await fetch('/api/worksessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(session),
+      });
+      if (!response.ok) {
+        throw new Error('Не вдалося додати робочу сесію');
+      }
+      setIsAddSessionModalOpen(false);
+      setNewSession({ date: '', projectId: '', startTime: '', endTime: '', taskDescription: '' });
+    } catch (error) {
+      alert('Помилка при додаванні сесії: ' + (error instanceof Error ? error.message : 'Невідома помилка'));
+    }
   };
 
   return (
@@ -116,10 +120,6 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
       {activeTab === 'general' && (
         <div className="flex flex-col animate-slideIn">
           <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors">
-            <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Посада:</span>
-            <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{employee.position}</span>
-          </div>
-          <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors">
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Навички:</span>
             <div className="flex flex-wrap gap-2 mt-2">
               {employee.skills.map((skill, index) => (
@@ -134,7 +134,7 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
           </div>
           <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors">
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Досвід:</span>
-            <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{formatYears(employee.experience)}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{formatYears(employee.yearsOfExperience)}</span>
           </div>
           <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors">
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Email:</span>
@@ -142,91 +142,36 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
           </div>
           <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors">
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Телефон:</span>
-            <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{employee.phone}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{employee.phone || 'Не вказано'}</span>
           </div>
           <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 hover:bg-gray-100/80 dark:hover:bg-gray-700/80 transition-colors">
             <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Біо:</span>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">{employee.bio}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">{employee.bio || 'Не вказано'}</p>
           </div>
         </div>
       )}
 
       {activeTab === 'stats' && (
         <div className="flex flex-col gap-6 animate-slideIn">
-          {employee.stats ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ">
-                
-              <InfoCard
-                value={employee.stats.hoursWorked}
-                label="Загальні години"
-              />
-              <InfoCard
-                value={employee.stats.reportsSubmitted}
-                label="Звіти подано"
-              />
-              <InfoCard
-                value={employee.stats.projectsInvolved}
-                label="Проєктів залучено"
-              />
-              </div>
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Останні робочі сесії</h3>
-                  <button
-                    onClick={() => setIsAddSessionModalOpen(true)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
-                  >
-                    Додати сесію
-                  </button>
-                </div>
-                {employee.recentWorkSessions && employee.recentWorkSessions.length > 0 ? (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700 rounded-lg">
-                      <thead>
-                        <tr className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100">
-                          <th className="p-2 text-left">Дата</th>
-                          <th className="p-2 text-left">Проєкт</th>
-                          <th className="p-2 text-left">Години</th>
-                          <th className="p-2 text-left">Опис</th>
-                          <th className="p-2 text-left">Дія</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {employee.recentWorkSessions.map((session) => (
-                          <tr
-                            key={session.id}
-                            className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700"
-                          >
-                            <td className="p-2">{formatDate(session.date)}</td>
-                            <td className="p-2">{session.project}</td>
-                            <td className="p-2">{session.hours}h</td>
-                            <td className="p-2 truncate max-w-xs">{session.description}</td>
-                            <td className="p-2">
-                              <button
-                                onClick={() => handleViewSession(session)}
-                                className="text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                              >
-                                View Full
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400">
-                    Немає робочих сесій
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400">
-              Статистика відсутня
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <InfoCard value={employee.totalHoursWorked} label="Загальні години" />
+            <InfoCard value={employee.reportsSubmitted} label="Звіти подано" />
+            <InfoCard value={employee.projectsInvolved} label="Проєктів залучено" />
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Останні робочі сесії</h3>
+              <button
+                onClick={() => setIsAddSessionModalOpen(true)}
+                className="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-medium hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
+              >
+                Додати сесію
+              </button>
             </div>
-          )}
+            <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 text-sm text-gray-600 dark:text-gray-400">
+              Немає робочих сесій
+            </div>
+          </div>
         </div>
       )}
 
@@ -245,11 +190,13 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
                 </div>
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                    project.status === 'Active'
+                    project.status === ProjectStatus.Active
                       ? 'bg-green-100 dark:bg-green-800 text-green-600 dark:text-green-200'
-                      : project.status === 'In Progress'
+                      : project.status === ProjectStatus.Completed
+                      ? 'bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-200'
+                      : project.status === ProjectStatus.OnHold
                       ? 'bg-yellow-100 dark:bg-yellow-800 text-yellow-600 dark:text-yellow-200'
-                      : 'bg-indigo-100 dark:bg-indigo-800 text-indigo-600 dark:text-indigo-200'
+                      : 'bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-200'
                   }`}
                 >
                   {project.status}
@@ -278,15 +225,15 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
             </div>
             <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50">
               <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Проєкт:</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{selectedSession.project}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{projects.find((p) => p.id === selectedSession.projectId)?.name || 'Невідомий'}</span>
             </div>
             <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50">
-              <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Години:</span>
-              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{selectedSession.hours}h</span>
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Час:</span>
+              <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">{`${selectedSession.startTime} - ${selectedSession.endTime}`}</span>
             </div>
             <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50">
               <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Опис:</span>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">{selectedSession.description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-relaxed">{selectedSession.taskDescription}</p>
             </div>
             <button
               onClick={() => setIsSessionModalOpen(false)}
@@ -313,25 +260,43 @@ const EmployeeDetailsTabs = ({ employee, projects }: EmployeeDetailsTabsProps) =
             type="date"
             required
           />
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-semibold text-gray-800 dark:text-gray-100">Проєкт:</label>
+            <select
+              name="projectId"
+              value={newSession.projectId}
+              onChange={handleSessionChange}
+              className="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 text-sm text-gray-800 dark:text-gray-100 bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Виберіть проєкт</option>
+              {assignedProjects.map((project) => (
+                <option key={project.id} value={project.id}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <FormField
-            label="Проєкт:"
-            name="project"
-            value={newSession.project}
+            label="Початковий час:"
+            name="startTime"
+            value={newSession.startTime}
             onChange={handleSessionChange}
+            type="time"
             required
           />
           <FormField
-            label="Години:"
-            name="hours"
-            value={newSession.hours}
+            label="Кінцевий час:"
+            name="endTime"
+            value={newSession.endTime}
             onChange={handleSessionChange}
-            type="number"
+            type="time"
             required
           />
           <FormField
             label="Опис:"
-            name="description"
-            value={newSession.description}
+            name="taskDescription"
+            value={newSession.taskDescription}
             onChange={handleSessionChange}
             textarea
           />

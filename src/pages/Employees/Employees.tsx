@@ -9,7 +9,7 @@ const Employees = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filteredEmployees = employees.filter((employee) =>
-    employee.name.toLowerCase().includes(searchQuery.toLowerCase())
+    employee.fullName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (loading) {

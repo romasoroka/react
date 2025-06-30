@@ -30,25 +30,21 @@ const EmployeeDetails = () => {
   return (
     <div className="mx-auto mt-2 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 text-gray-800 dark:text-gray-100">
       <div className="flex items-center gap-4 mb-6 border-b-2 border-gray-200 dark:border-gray-700 pb-2">
-        {/* Аватар */}
-        {employee.image ? (
+        {employee.imageUrl ? (
           <img
-            src={employee.image}
-            alt={employee.name}
+            src={employee.imageUrl}
+            alt={employee.fullName}
             className="w-12 h-12 rounded-full object-cover"
           />
         ) : (
           <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-white dark:text-gray-200 text-sm font-semibold">
-            {employee.name.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+            {employee.fullName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
           </div>
         )}
-
-        {/* Ім’я */}
         <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 md:text-2xl">
-          {employee.name}
+          {employee.fullName}
         </h2>
       </div>
-
       <EmployeeDetailsTabs employee={employee} projects={projects} />
     </div>
   );

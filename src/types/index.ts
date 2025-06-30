@@ -1,61 +1,64 @@
 export interface Credential {
-  name: string; 
-  value?: string;
+  id?: number; 
+  name: string;
+  value: string;
   description?: string;
 }
 
-export interface ProjectAnalytics {
-  hoursLogged: number; 
-  reports: number; 
+export interface Technology {
+  id: number;
+  name: string;
+}
+
+export enum ProjectStatus {
+  Active = 0,
+  Completed = 1,
+  OnHold = 2,
+  Cancelled = 3,
 }
 
 export interface Project {
-  id: number;
+  id: number; 
   name: string;
-  status: string;
+  status: ProjectStatus;
   technologies: string[];
   description: string;
-  programmers: string[];
-  startDate: string;
-  endDate: string;
-  budget: string;
+  detailedDescription?: string;
+  startDate: string; 
+  endDate?: string; 
+  budget: number;
   client: string;
-  detailedDescription: string;
   credentials?: Credential[];
-  analytics: ProjectAnalytics; 
+  workSessions?: WorkSession[];
+  totalHoursLogged: number; 
+  reportCount: number;
+  activeEmployees: number; 
+  employeeIds: number[];
+  employeeNames?: string[];
 }
-  
-  export interface EmployeeStats {
-    hoursWorked: number; 
-    reportsSubmitted: number; 
-    projectsInvolved: number; 
-  }
-  
-  export interface Employee {
-    id: number;
-    name: string;
-    position: string;
-    skills: string[];
-    experience: number;
-    projects: string[]; 
-    email: string;
-    phone: string;
-    bio: string;
-    stats: EmployeeStats;
-    image?: string; 
-    recentWorkSessions?: WorkSession[]; 
-  }
 
-  export interface WorkSession {
-    id: number;
-    date: string; 
-    project: string; 
-    hours: number; 
-    description: string; 
-  }
+export interface Employee {
+  id: number; 
+  fullName: string;
+  yearsOfExperience: number;
+  skills: string[];
+  email: string;
+  phone?: string;
+  bio?: string;
+  imageUrl?: string;
+  totalHoursWorked: number; 
+  reportsSubmitted: number; 
+  projectsInvolved: number; 
+  projectIds: number[];
+  workSessions?: WorkSession[];
+}
 
-  export interface WorkSessionWithEmployee extends WorkSession {
-    employee?: string;
-  }
-
-  
+export interface WorkSession {
+  id?: number;
+  date: string;
+  startTime: string;
+  endTime: string;
+  taskDescription: string;
+  projectId: number;
+  employeeId: number;
+}

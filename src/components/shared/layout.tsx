@@ -12,7 +12,7 @@ interface LayoutProps {
 const ContentWrapper = ({ children }: { children: ReactNode }) => {
   const { isCollapsed } = useSidebarContext();
 
-  const sidebarOffset = isCollapsed ? 'ml-16' : 'ml-64'; 
+  const sidebarOffset = isCollapsed ? 'ml-16' : 'ml-60'; 
 
   return (
     <div className={`flex-1 transition-all duration-300 ease-in-out `}>

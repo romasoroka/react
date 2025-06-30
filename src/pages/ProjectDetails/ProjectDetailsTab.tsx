@@ -1,14 +1,13 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, lazy, Suspense } from 'react';
 import Modal from '../../components/ui/Modal';
-import FormField from '../../components/ui/FormField';
-import { Project, Employee, Credential, WorkSession } from '../../types';
+import { Project, Employee, WorkSession } from '../../types';
 import { useAppContext } from '../../context/AppContext';
 import ProjectGeneralTab from './Tabs/GeneralTab';
 import ProjectTeamTab from './Tabs/TeamTab';
 import ProjectAnalyticsTab from './Tabs/AnalyticsTab';
-import ProjectCredentialsTab from './Tabs/CredentialsTab';
 import ProjectSessionsTab from './Tabs/SessionsTab';
+
+const ProjectCredentialsTab = lazy(() => import('./Tabs/CredentialsTab'));
 
 interface ProjectDetailsTabsProps {
   project: Project;
@@ -18,87 +17,34 @@ interface ProjectDetailsTabsProps {
 const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => {
   const [activeTab, setActiveTab] = useState('general');
   const [showValues, setShowValues] = useState<{ [key: number]: boolean }>({});
-  const [isAddCredentialOpen, setIsAddCredentialOpen] = useState(false);
-  const [isAddSessionModalOpen, setIsAddSessionModalOpen] = useState(false);
   const [isViewSessionModalOpen, setIsViewSessionModalOpen] = useState(false);
   const [selectedSession, setSelectedSession] = useState<WorkSession | null>(null);
-  const [newSession, setNewSession] = useState({
-    date: '',
-    employee: '',
-    hours: '',
-    description: '',
-  });
-  const {  updateEmployee } = useAppContext();
-  const navigate = useNavigate();
+  const { updateProject, updateEmployee, workSessions } = useAppContext();
 
   const toggleValue = (index: number) => {
     setShowValues((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
-  const handleCredentialChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setNewCredential({ ...newCredential, [name]: value });
-  };
-
-  const handleAddCredential = (e: React.FormEvent) => {
-    e.preventDefault();
-    const updatedProject = {
-      ...project,
-      credentials: [...(project.credentials ?? []), newCredential],
-    };
-    setIsAddCredentialOpen(false);
-    setNewCredential({
-      name: '',
-      value: '',
-      description: '',
-    });
-  };
-
-  const handleSessionChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setNewSession({ ...newSession, [name]: value });
-  };
-
-  const handleAddSession = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSession.date || !newSession.employee || !newSession.hours) {
-      alert('Дата, працівник і години є обов’язковими');
-      return;
+  const handleUpdateProject = async (updatedProject: Project) => {
+    try {
+      if (!updatedProject.id) throw new Error('Project ID is missing');
+      console.log('Updating project with:', updatedProject);
+      await updateProject(updatedProject.id, updatedProject);
+    } catch (err) {
+      console.error('Update project error:', err);
+      alert('Помилка при оновленні проєкту: ' + (err instanceof Error ? err.message : 'Невідома помилка'));
     }
-    const employee = employees.find((e) => e.name === newSession.employee);
-    if (!employee) {
-      alert('Працівник не знайдений');
-      return;
+  };
+
+  const handleUpdateEmployee = async (updatedEmployee: Employee) => {
+    try {
+      if (!updatedEmployee.id) throw new Error('Employee ID is missing');
+      console.log('Updating employee with:', updatedEmployee);
+      await updateEmployee(updatedEmployee.id, updatedEmployee);
+    } catch (err) {
+      console.error('Update employee error:', err);
+      alert('Помилка при оновленні працівника: ' + (err instanceof Error ? err.message : 'Невідома помилка'));
     }
-    const session: WorkSession = {
-      id: (employee.recentWorkSessions?.length || 0) + 1,
-      date: newSession.date,
-      project: project.name,
-      hours: Number(newSession.hours),
-      description: newSession.description,
-    };
-    const updatedEmployee: Employee = {
-      ...employee,
-      recentWorkSessions: [...(employee.recentWorkSessions || []), session],
-      stats: {
-        ...employee.stats,
-        hoursWorked: (employee.stats.hoursWorked || 0) + session.hours,
-      },
-    };
-    const updatedProject: Project = {
-      ...project,
-      analytics: {
-        ...project.analytics,
-        hoursLogged: project.analytics.hoursLogged + session.hours,
-      },
-    };
-    updateEmployee(employee.id, updatedEmployee);
-    setIsAddSessionModalOpen(false);
-    setNewSession({ date: '', employee: '', hours: '', description: '' });
   };
 
   const handleViewSession = (session: WorkSession) => {
@@ -106,39 +52,12 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
     setIsViewSessionModalOpen(true);
   };
 
-  // Aggregate work sessions for this project
-  const workSessions = employees
-    .flatMap((employee) =>
-      (employee.recentWorkSessions || [])
-        .filter((session) => session.project === project.name)
-        .map((session) => ({ ...session, employee: employee.name }))
-    )
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  // Calculate analytics metrics
-  const teamMembers = project.programmers.length;
-  const credentialsCount = project.credentials?.length ?? 0;
-  const avgHoursPerMember = teamMembers > 0 ? (project.analytics.hoursLogged / teamMembers).toFixed(2) : 0;
-  const formattedStartDate = new Date(project.startDate).toLocaleDateString('uk-UA', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
-
-  // Map programmers to employees for links
-  const team = project.programmers.map((programmer) => {
-    const employee = employees.find((e) => e.name === programmer);
-    return { name: programmer, id: employee?.id };
-  });
-
-  const [newCredential, setNewCredential] = useState<Credential>({
-    name: '',
-    value: '',
-    description: '',
-  });
-
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('uk-UA', {
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      return 'Невалідна дата';
+    }
+    return parsedDate.toLocaleDateString('uk-UA', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -146,8 +65,7 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg  dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-      {/* Tab Navigation */}
+    <div className="flex flex-col gap-4 rounded-lg dark:bg-gray-800 text-gray-800 dark:text-gray-100">
       <div className="flex border-b border-gray-200 dark:border-gray-700">
         <button
           className={`px-4 py-2 text-sm font-medium ${
@@ -201,120 +119,32 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
         </button>
       </div>
 
-      {/* Tab Content */}
       {activeTab === 'general' && <ProjectGeneralTab project={project} />}
       {activeTab === 'team' && <ProjectTeamTab project={project} employees={employees} />}
       {activeTab === 'analytics' && <ProjectAnalyticsTab project={project} />}
       {activeTab === 'credentials' && (
-        <ProjectCredentialsTab
-          project={project}
-          showValues={showValues}
-          toggleValue={toggleValue}
-          setIsAddCredentialOpen={setIsAddCredentialOpen}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <ProjectCredentialsTab
+            project={project}
+            showValues={showValues}
+            toggleValue={toggleValue}
+            onUpdateProject={handleUpdateProject}
+          />
+        </Suspense>
       )}
       {activeTab === 'sessions' && (
         <ProjectSessionsTab
           project={project}
           employees={employees}
           workSessions={workSessions}
-          onAddClick={() => setIsAddSessionModalOpen(true)}
+          onAddClick={() => {}}
           onViewSession={handleViewSession}
           formatDate={formatDate}
+          onUpdateProject={handleUpdateProject}
+          onUpdateEmployee={handleUpdateEmployee}
         />
       )}
 
-      {/* Credential Modal */}
-      <Modal
-        isOpen={isAddCredentialOpen}
-        onClose={() => setIsAddCredentialOpen(false)}
-        title="Додати опублікові дані"
-      >
-        <form onSubmit={handleAddCredential} className="flex flex-col bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-          <FormField
-            label="Назва:"
-            name="name"
-            value={newCredential.name}
-            onChange={handleCredentialChange}
-            required
-          />
-          <FormField
-            label="Значення (e.g., password, secret):"
-            name="value"
-            value={newCredential.value ?? ''}
-            onChange={handleCredentialChange}
-          />
-          <FormField
-            label="Опис (опціонально):"
-            name="description"
-            value={newCredential.description ?? ''}
-            onChange={handleCredentialChange}
-            textarea
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
-          >
-            Додати
-          </button>
-        </form>
-      </Modal>
-
-      {/* Add Session Modal */}
-      <Modal
-        isOpen={isAddSessionModalOpen}
-        onClose={() => setIsAddSessionModalOpen(false)}
-        title="Додати робочу сесію"
-      >
-        <form onSubmit={handleAddSession} className="flex flex-col bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
-          <FormField
-            label="Дата:"
-            name="date"
-            value={newSession.date}
-            onChange={handleSessionChange}
-            type="date"
-            required
-          />
-          <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 dark:bg-gray-700/50 hover:bg-gray-100/80 dark:hover:bg-gray-600/80 transition-colors">
-            <label className="text-sm font-semibold text-gray-800 dark:text-gray-100">Працівник:</label>
-            <select
-              name="employee"
-              value={newSession.employee}
-              onChange={handleSessionChange}
-              className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-md text-sm text-gray-600 dark:text-gray-200 bg-white dark:bg-gray-800 focus:border-blue-600 dark:focus:border-blue-400 outline-none"
-              required
-            >
-              <option value="">Виберіть працівника</option>
-              {project.programmers.map((programmer, index) => (
-                <option key={index} value={programmer}>{programmer}</option>
-              ))}
-            </select>
-          </div>
-          <FormField
-            label="Години:"
-            name="hours"
-            value={newSession.hours}
-            onChange={handleSessionChange}
-            type="number"
-            required
-          />
-          <FormField
-            label="Опис:"
-            name="description"
-            value={newSession.description}
-            onChange={handleSessionChange}
-            textarea
-          />
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-800 transition-colors"
-          >
-            Додати
-          </button>
-        </form>
-      </Modal>
-
-      {/* View Session Modal */}
       {selectedSession && (
         <Modal
           isOpen={isViewSessionModalOpen}
@@ -328,15 +158,19 @@ const ProjectDetailsTabs = ({ project, employees }: ProjectDetailsTabsProps) => 
             </div>
             <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-700/50">
               <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Проєкт:</span>
-              <span className="text-sm text-gray-600 dark:text-gray-300 ml-2">{selectedSession.project}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300 ml-2">{project.name}</span>
             </div>
             <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-700/50">
-              <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Години:</span>
-              <span className="text-sm text-gray-600 dark:text-gray-300 ml-2">{selectedSession.hours}h</span>
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Працівник:</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300 ml-2">{employees.find((e) => e.id === selectedSession.employeeId)?.fullName || 'Невідомий'}</span>
+            </div>
+            <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-700/50">
+              <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Час:</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300 ml-2">{`${selectedSession.startTime} - ${selectedSession.endTime}`}</span>
             </div>
             <div className="p-2 rounded-lg bg-white/50 dark:bg-gray-700/50">
               <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">Опис:</span>
-              <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">{selectedSession.description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 leading-relaxed">{selectedSession.taskDescription}</p>
             </div>
             <button
               onClick={() => setIsViewSessionModalOpen(false)}

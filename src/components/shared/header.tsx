@@ -13,7 +13,7 @@ const Header = ({ isAdmin = true, userName = 'Roman' }) => {
     <header
     className={`fixed top-0 h-16 bg-white dark:bg-gray-900 shadow-sm flex items-center justify-between px-6 md:px-4 z-50 transition-all duration-300 ease-in-out ${
       isCollapsed
-        ? 'ml-20 w-[calc(100%-5rem)]'  
+        ? 'ml-16 w-[calc(100%-4rem)]'  
         : 'ml-60 w-[calc(100%-15rem)]' 
     }`}
     >
