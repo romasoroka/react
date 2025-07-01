@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Employee, Project, WorkSession } from '../../../types';
-import Modal from '../../../components/ui/Modal';
-import FormField from '../../../components/ui/FormField';
-import { useAppContext } from '../../../context/AppContext';
+import React, { useState, useMemo, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { Employee, Project, WorkSession } from "../../../types/Models";
+import Modal from "../../../components/ui/Modal";
+import FormField from "../../../components/ui/FormField";
+import { useWorkSessionContext } from "../../../context/WorkSessionContext";
 
 interface ProjectSessionsTabProps {
   project: Project;
@@ -25,35 +25,40 @@ const ProjectSessionsTab = ({
   onUpdateProject,
   onUpdateEmployee,
 }: ProjectSessionsTabProps) => {
-  const { addWorkSession, loadWorkSessions } = useAppContext();
+  const { addWorkSession, loadWorkSessions } = useWorkSessionContext();
   const [isAddSessionModalOpen, setIsAddSessionModalOpen] = useState(false);
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>("");
   const [newSession, setNewSession] = useState({
-    date: '',
-    employeeId: '',
-    startTime: '',
-    endTime: '',
-    taskDescription: '',
+    date: "",
+    employeeId: "",
+    startTime: "",
+    endTime: "",
+    taskDescription: "",
   });
   const [error, setError] = useState<string | null>(null);
 
-  // Завантажуємо сесії при монтуванні компонента
   useEffect(() => {
+    console.log(
+      "Loading work sessions in ProjectSessionsTab, project:",
+      project
+    );
     loadWorkSessions();
-  }, [loadWorkSessions]);
+  }, [loadWorkSessions, project]);
 
   const handleSessionChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     const { name, value } = e.target;
     setNewSession({ ...newSession, [name]: value });
   };
 
   const validateSession = () => {
-    if (!newSession.date) return 'Дата є обов’язковою';
-    if (!newSession.employeeId) return 'Працівник є обов’язковим';
-    if (!newSession.startTime) return 'Початковий час є обов’язковим';
-    if (!newSession.endTime) return 'Кінцевий час є обов’язковим';
+    if (!newSession.date) return "Дата є обов’язковою";
+    if (!newSession.employeeId) return "Працівник є обов’язковим";
+    if (!newSession.startTime) return "Початковий час є обов’язковим";
+    if (!newSession.endTime) return "Кінцевий час є обов’язковим";
     return null;
   };
 
@@ -67,13 +72,15 @@ const ProjectSessionsTab = ({
       return;
     }
 
-    const employee = employees.find((e) => e.id === Number(newSession.employeeId));
+    const employee = employees.find(
+      (e) => e.id === Number(newSession.employeeId)
+    );
     if (!employee) {
-      setError('Працівник не знайдений');
+      setError("Працівник не знайдений");
       return;
     }
 
-    const session: Omit<WorkSession, 'id'> = {
+    const session: Omit<WorkSession, "id"> = {
       date: newSession.date,
       projectId: project.id,
       employeeId: Number(newSession.employeeId),
@@ -83,30 +90,52 @@ const ProjectSessionsTab = ({
     };
 
     try {
-      console.log('Adding work session:', { session, project, employee });
-      await addWorkSession(session, project, employee, onUpdateProject, onUpdateEmployee);
+      console.log("Adding work session:", { session, project, employee });
+      await addWorkSession(
+        session,
+        project,
+        employee,
+        onUpdateProject,
+        onUpdateEmployee
+      );
       setIsAddSessionModalOpen(false);
-      setNewSession({ date: '', employeeId: '', startTime: '', endTime: '', taskDescription: '' });
+      setNewSession({
+        date: "",
+        employeeId: "",
+        startTime: "",
+        endTime: "",
+        taskDescription: "",
+      });
     } catch (error) {
-      setError('Помилка при додаванні сесії: ' + (error instanceof Error ? error.message : 'Невідома помилка'));
+      const errorMessage =
+        error instanceof Error ? error.message : "Невідома помилка";
+      setError("Помилка при додаванні сесії: " + errorMessage);
+      console.error("Add session error:", error);
     }
   };
 
-  // Сортування та фільтрація сесій
   const filteredAndSortedSessions = useMemo(() => {
-    console.log('WorkSessions in ProjectSessionsTab:', workSessions);
-    console.log('Project ID:', project.id);
-    let sessions = workSessions.filter((session) => session.projectId === project.id);
+    console.log("WorkSessions in ProjectSessionsTab:", workSessions);
+    console.log("Project ID:", project.id);
+    let sessions = workSessions.filter(
+      (session) => session.projectId === project.id
+    );
     if (selectedEmployeeId) {
-      sessions = sessions.filter((session) => session.employeeId === Number(selectedEmployeeId));
+      sessions = sessions.filter(
+        (session) => session.employeeId === Number(selectedEmployeeId)
+      );
     }
-    return sessions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return sessions.sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
   }, [workSessions, project.id, selectedEmployeeId]);
 
   return (
     <div className="flex flex-col m-2 gap-4 animate-slideIn bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-100">
       <div className="flex justify-between items-center">
-        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">Останні робочі сесії</h3>
+        <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+          Останні робочі сесії
+        </h3>
         <div className="flex items-center gap-4">
           <select
             value={selectedEmployeeId}
@@ -114,14 +143,18 @@ const ProjectSessionsTab = ({
             className="p-1 border border-gray-200 dark:border-gray-600 rounded-md text-sm text-gray-600 dark:text-gray-200 bg-white dark:bg-gray-800 focus:border-blue-600 dark:focus:border-blue-400 outline-none"
           >
             <option value="">Усі працівники</option>
-            {project.employeeIds.map((employeeId) => {
-              const employee = employees.find((e) => e.id === employeeId);
-              return (
-                <option key={employeeId} value={employeeId}>
-                  {employee?.fullName || 'Невідомий'}
-                </option>
-              );
-            })}
+            {project.employeeIds && Array.isArray(project.employeeIds) ? (
+              project.employeeIds.map((employeeId) => {
+                const employee = employees.find((e) => e.id === employeeId);
+                return (
+                  <option key={employeeId} value={employeeId}>
+                    {employee?.fullName || "Невідомий"}
+                  </option>
+                );
+              })
+            ) : (
+              <option value="">Немає працівників</option>
+            )}
           </select>
           <button
             onClick={() => setIsAddSessionModalOpen(true)}
@@ -153,17 +186,23 @@ const ProjectSessionsTab = ({
                   <td className="p-2">
                     {employees.find((e) => e.id === session.employeeId)?.id ? (
                       <Link
-                        to={`/employees/${employees.find((e) => e.id === session.employeeId)?.id}`}
+                        to={`/employees/${
+                          employees.find((e) => e.id === session.employeeId)?.id
+                        }`}
                         className="text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300"
                       >
-                        {employees.find((e) => e.id === session.employeeId)?.fullName || 'Невідомий'}
+                        {employees.find((e) => e.id === session.employeeId)
+                          ?.fullName || "Невідомий"}
                       </Link>
                     ) : (
-                      employees.find((e) => e.id === session.employeeId)?.fullName || 'Невідомий'
+                      employees.find((e) => e.id === session.employeeId)
+                        ?.fullName || "Невідомий"
                     )}
                   </td>
                   <td className="p-2">{`${session.startTime} - ${session.endTime}`}</td>
-                  <td className="p-2 truncate max-w-xs">{session.taskDescription}</td>
+                  <td className="p-2 truncate max-w-xs">
+                    {session.taskDescription}
+                  </td>
                   <td className="p-2">
                     <button
                       onClick={() => onViewSession(session)}
@@ -205,7 +244,9 @@ const ProjectSessionsTab = ({
             required
           />
           <div className="flex flex-col gap-2 p-3 rounded-lg bg-white/50 dark:bg-gray-700/50 hover:bg-gray-100/80 dark:hover:bg-gray-600/80 transition-colors">
-            <label className="text-sm font-semibold text-gray-800 dark:text-gray-100">Працівник:</label>
+            <label className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+              Працівник:
+            </label>
             <select
               name="employeeId"
               value={newSession.employeeId}
@@ -214,14 +255,18 @@ const ProjectSessionsTab = ({
               required
             >
               <option value="">Виберіть працівника</option>
-              {project.employeeIds.map((employeeId) => {
-                const employee = employees.find((e) => e.id === employeeId);
-                return (
-                  <option key={employeeId} value={employeeId}>
-                    {employee?.fullName || 'Невідомий'}
-                  </option>
-                );
-              })}
+              {project.employeeIds && Array.isArray(project.employeeIds) ? (
+                project.employeeIds.map((employeeId) => {
+                  const employee = employees.find((e) => e.id === employeeId);
+                  return (
+                    <option key={employeeId} value={employeeId}>
+                      {employee?.fullName || "Невідомий"}
+                    </option>
+                  );
+                })
+              ) : (
+                <option value="">Немає працівників</option>
+              )}
             </select>
           </div>
           <FormField

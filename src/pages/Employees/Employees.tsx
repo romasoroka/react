@@ -1,19 +1,30 @@
-import { useState } from 'react';
-import { FaSearch } from 'react-icons/fa';
-import CreateEmployeeForm from './CreateEmployee';
-import EmployeeList from './EmployeeList';
-import { useAppContext } from '../../context/AppContext';
+import { useState } from "react";
+import { FaSearch } from "react-icons/fa";
+import CreateEmployeeForm from "./CreateEmployee";
+import EmployeeList from "./EmployeeList";
+import { useEmployeeContext } from "../../context/EmployeeContext";
+import { Employee } from "../../types/Models";
 
 const Employees = () => {
-  const { employees, addEmployee, loading, error } = useAppContext();
-  const [searchQuery, setSearchQuery] = useState('');
+  const { employees, addEmployee, loadEmployees, loading, error } =
+    useEmployeeContext();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredEmployees = employees.filter((employee) =>
+  const filteredEmployees = employees.filter((employee: Employee) =>
     employee.fullName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const handleCreate = async (employee: Omit<Employee, "id">) => {
+    await addEmployee(employee);
+    await loadEmployees();
+  };
+
   if (loading) {
-    return <div className="text-center text-gray-500 dark:text-gray-400">Завантаження...</div>;
+    return (
+      <div className="text-center text-gray-500 dark:text-gray-400">
+        Завантаження...
+      </div>
+    );
   }
 
   if (error) {
@@ -26,7 +37,7 @@ const Employees = () => {
         👥 Працівники
       </h2>
       <div className="flex items-center gap-3 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm mb-8 max-w-md w-full md:max-w-full">
-        {(FaSearch as any)({ className: 'text-gray-500 dark:text-gray-400' })}
+        {(FaSearch as any)({ className: "text-gray-500 dark:text-gray-400" })}
         <input
           type="text"
           placeholder="Пошук працівників за ім’ям..."
@@ -35,7 +46,7 @@ const Employees = () => {
           className="flex-1 bg-transparent border-none outline-none text-sm text-gray-600 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
         />
       </div>
-      <CreateEmployeeForm onCreate={addEmployee} />
+      <CreateEmployeeForm onCreate={handleCreate} />
       <EmployeeList employees={filteredEmployees} />
     </div>
   );

@@ -1,14 +1,16 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext';
-import EmployeeDetailsTabs from '../EmployeeDetails/EmployeeDetailsTabs';
-import { Employee, Project } from '../../types';
+import { useParams, useNavigate } from "react-router-dom";
+import { useEmployeeContext } from "../../context/EmployeeContext";
+import { useProjectContext } from "../../context/ProjectContext";
+import EmployeeDetailsTabs from "../EmployeeDetails/EmployeeDetailsTabs";
+import { Employee, Project } from "../../types/Models";
 
 const EmployeeDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { employees, projects } = useAppContext();
+  const { employees } = useEmployeeContext();
+  const { projects } = useProjectContext();
   const navigate = useNavigate();
 
-  const employee = employees.find((e) => e.id === Number(id));
+  const employee = employees.find((e: Employee) => e.id === Number(id));
 
   if (!employee) {
     return (
@@ -18,7 +20,7 @@ const EmployeeDetails = () => {
         </h2>
         <p>Працівник з ID {id} не існує.</p>
         <button
-          onClick={() => navigate('/employees')}
+          onClick={() => navigate("/employees")}
           className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-semibold hover:bg-blue-700 dark:hover:bg-blue-500 transition-colors"
         >
           Повернутися до працівників
@@ -38,7 +40,11 @@ const EmployeeDetails = () => {
           />
         ) : (
           <div className="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-white dark:text-gray-200 text-sm font-semibold">
-            {employee.fullName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+            {employee.fullName
+              .split(" ")
+              .map((n: string) => n[0])
+              .join("")
+              .slice(0, 2)}
           </div>
         )}
         <h2 className="text-3xl font-bold text-gray-800 dark:text-gray-100 md:text-2xl">

@@ -1,15 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AppProvider } from './context/AppContext';
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AppProvider } from "./context/AppProvider";
 
-import Layout from './components/shared/layout';
-import Projects from './pages/Projects/Projects';
-import ProjectDetails from './pages/ProjectDetails/ProjectDetails';
-import Employees from './pages/Employees/Employees';
-import EmployeeDetails from './pages/EmployeeDetails/EmployeeDetails'; 
-import { ThemeProvider } from './components/utils/themeChange';
-import DashboardPage from './pages/Dashboard/Dashboard';
-
-
+import Layout from "./components/shared/layout";
+import Projects from "./pages/Projects/Projects";
+import ProjectDetails from "./pages/ProjectDetails/ProjectDetails";
+import Employees from "./pages/Employees/Employees";
+import EmployeeDetails from "./pages/EmployeeDetails/EmployeeDetails";
+import { ThemeProvider } from "./components/utils/themeChange";
+import DashboardPage from "./pages/Dashboard/Dashboard";
 
 const App = () => {
   return (
@@ -18,12 +16,7 @@ const App = () => {
         <Router>
           <Layout userName="Роман" isAdmin={true}>
             <Routes>
-              <Route
-                path="/dashboard"
-                element={
-                  <DashboardPage/>
-                }
-              />
+              <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/projects/:id" element={<ProjectDetails />} />
               <Route path="/employees" element={<Employees />} />
@@ -37,12 +30,7 @@ const App = () => {
                   </div>
                 }
               />
-              <Route
-                path="/dashboard"
-                element={
-                  <DashboardPage/>
-                }
-              />
+              <Route path="/dashboard" element={<DashboardPage />} />
             </Routes>
           </Layout>
         </Router>

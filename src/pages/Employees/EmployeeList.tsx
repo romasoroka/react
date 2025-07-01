@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { Employee } from '../../types';
+import { Link } from "react-router-dom";
+import { Employee } from "../../types/Models";
 
 interface EmployeeListProps {
   employees: Employee[];
@@ -23,7 +23,11 @@ const EmployeeList = ({ employees }: EmployeeListProps) => {
               />
             ) : (
               <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 flex items-center justify-center text-white dark:text-gray-200 text-sm font-semibold">
-                {employee.fullName.split(' ').map((n) => n[0]).join('').slice(0, 2)}
+                {employee.fullName
+                  .split(" ")
+                  .map((n) => n[0])
+                  .join("")
+                  .slice(0, 2)}
               </div>
             )}
             <div>

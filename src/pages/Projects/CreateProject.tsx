@@ -1,10 +1,15 @@
-import { useState, useEffect, FormEvent, ChangeEvent } from 'react';
-import SelectComponent from '../../components/ui/SelectComponents';
-import Modal from '../../components/ui/Modal';
-import FormField from '../../components/ui/FormField';
-import { Project, ProjectStatus, Employee, Technology } from '../../types';
-import { useAppContext } from '../../context/AppContext';
-import { fetchTechnologies } from '../../services/technologies';
+import { useState, useEffect, FormEvent, ChangeEvent } from "react";
+import SelectComponent from "../../components/ui/SelectComponents";
+import Modal from "../../components/ui/Modal";
+import FormField from "../../components/ui/FormField";
+import {
+  Project,
+  ProjectStatus,
+  Employee,
+  Technology,
+} from "../../types/Models";
+import { useEmployeeContext } from "../../context/EmployeeContext";
+import { fetchTechnologies } from "../../services/technologies";
 
 interface ProjectFormData {
   name: string;
@@ -20,32 +25,34 @@ interface ProjectFormData {
 }
 
 const initialProjectFormData: ProjectFormData = {
-  name: '',
+  name: "",
   status: ProjectStatus.Active,
   technologies: [],
-  description: '',
+  description: "",
   employeeIds: [],
-  startDate: '',
-  endDate: '',
-  budget: '',
-  client: '',
-  detailedDescription: '',
+  startDate: "",
+  endDate: "",
+  budget: "",
+  client: "",
+  detailedDescription: "",
 };
 
 interface CreateProjectFormProps {
-  onCreate: (project: Omit<Project, 'id'>) => Promise<void>;
+  onCreate: (project: Omit<Project, "id">) => Promise<void>;
 }
 
 const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
-  const { employees } = useAppContext();
+  const { employees } = useEmployeeContext();
   const [isOpen, setIsOpen] = useState(false);
-  const [newProject, setNewProject] = useState<ProjectFormData>(initialProjectFormData);
+  const [newProject, setNewProject] = useState<ProjectFormData>(
+    initialProjectFormData
+  );
   const [error, setError] = useState<string | null>(null);
   const [technologies, setTechnologies] = useState<Technology[]>([]);
 
   useEffect(() => {
-    console.log('Available employees:', employees);
-    console.log('Available technologies:', technologies);
+    console.log("Available employees:", employees);
+    console.log("Available technologies:", technologies);
   }, [employees, technologies]);
 
   useEffect(() => {
@@ -54,8 +61,8 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
         const techs = await fetchTechnologies();
         setTechnologies(techs);
       } catch (err) {
-        console.error('Failed to fetch technologies:', err);
-        setError('Помилка завантаження технологій');
+        console.error("Failed to fetch technologies:", err);
+        setError("Помилка завантаження технологій");
       }
     };
     loadTechnologies();
@@ -65,24 +72,29 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setNewProject({ ...newProject, [name]: name === 'status' ? Number(value) as ProjectStatus : value });
+    setNewProject({
+      ...newProject,
+      [name]: name === "status" ? (Number(value) as ProjectStatus) : value,
+    });
   };
 
   const validateForm = () => {
-    if (!newProject.name.trim()) return 'Назва проєкту є обов’язковою';
-    if (!newProject.startDate) return 'Дата початку є обов’язковою';
-    if (newProject.budget && isNaN(Number(newProject.budget))) return 'Бюджет має бути числом';
+    if (!newProject.name.trim()) return "Назва проєкту є обов’язковою";
+    if (!newProject.startDate) return "Дата початку є обов’язковою";
+    if (newProject.budget && isNaN(Number(newProject.budget)))
+      return "Бюджет має бути числом";
     if (
       newProject.employeeIds.length > 0 &&
       newProject.employeeIds.some(
-        (empName) => !employees.find((e) => e.fullName === empName)
+        (empName: string) =>
+          !employees.find((e: Employee) => e.fullName === empName)
       )
     )
-      return 'Обрано неіснуючого працівника';
+      return "Обрано неіснуючого працівника";
     if (newProject.startDate && isNaN(new Date(newProject.startDate).getTime()))
-      return 'Невірний формат дати початку';
+      return "Невірний формат дати початку";
     if (newProject.endDate && isNaN(new Date(newProject.endDate).getTime()))
-      return 'Невірний формат дати завершення';
+      return "Невірний формат дати завершення";
     return null;
   };
 
@@ -97,23 +109,25 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
     }
 
     const employeeIds = newProject.employeeIds
-      .map((empName) => {
-        const emp = employees.find((e) => e.fullName === empName);
+      .map((empName: string) => {
+        const emp = employees.find((e: Employee) => e.fullName === empName);
         return emp?.id;
       })
       .filter((id): id is number => id !== undefined && id > 0);
 
-    const project: Omit<Project, 'id'> = {
+    const project: Omit<Project, "id"> = {
       name: newProject.name.trim(),
       status: newProject.status,
       technologies: newProject.technologies,
-      description: newProject.description || '',
-      detailedDescription: newProject.detailedDescription || '',
+      description: newProject.description || "",
+      detailedDescription: newProject.detailedDescription || "",
       employeeIds,
       startDate: new Date(newProject.startDate).toISOString(),
-      endDate: newProject.endDate ? new Date(newProject.endDate).toISOString() : undefined,
+      endDate: newProject.endDate
+        ? new Date(newProject.endDate).toISOString()
+        : undefined,
       budget: Number(newProject.budget) || 0,
-      client: newProject.client || '',
+      client: newProject.client || "",
       credentials: [],
       totalHoursLogged: 0,
       reportCount: 0,
@@ -121,16 +135,16 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
     };
 
     try {
-      console.log('Project payload:', JSON.stringify(project, null, 2));
+      console.log("Project payload:", JSON.stringify(project, null, 2));
       await onCreate(project);
       setIsOpen(false);
       setNewProject(initialProjectFormData);
     } catch (err) {
       if (err instanceof Error) {
-        console.error('Error details:', err);
-        setError('Помилка при створенні проєкту: ' + err.message);
+        console.error("Error details:", err);
+        setError("Помилка при створенні проєкту: " + err.message);
       } else {
-        setError('Помилка при створенні проєкту: Невідома помилка');
+        setError("Помилка при створенні проєкту: Невідома помилка");
       }
     }
   };
@@ -150,8 +164,15 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
       >
         Створити проєкт
       </button>
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Створити новий проєкт">
-        <form onSubmit={handleSubmit} className="flex flex-col bg-white dark:bg-gray-800/50 text-gray-800 dark:text-gray-100">
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Створити новий проєкт"
+      >
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col bg-white dark:bg-gray-800/50 text-gray-800 dark:text-gray-100"
+        >
           {error && (
             <div className="mb-4 p-2 bg-red-100 dark:bg-red-800 text-red-600 dark:text-red-200 rounded-lg text-sm">
               {error}
@@ -165,7 +186,9 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
             required
           />
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-gray-800 dark:text-gray-100">Статус:</label>
+            <label className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+              Статус:
+            </label>
             <select
               name="status"
               value={newProject.status}
@@ -181,9 +204,14 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
           </div>
           <SelectComponent
             label="Технології"
-            options={technologies.map((tech) => ({ value: tech.name, label: tech.name }))}
+            options={technologies.map((tech) => ({
+              value: tech.name,
+              label: tech.name,
+            }))}
             selected={newProject.technologies}
-            onChange={(values) => setNewProject({ ...newProject, technologies: values })}
+            onChange={(values) =>
+              setNewProject({ ...newProject, technologies: values })
+            }
           />
           <FormField
             label="Короткий опис:"
@@ -201,9 +229,14 @@ const CreateProjectForm = ({ onCreate }: CreateProjectFormProps) => {
           />
           <SelectComponent
             label="Працівники"
-            options={employees.map((emp) => ({ value: emp.fullName, label: emp.fullName }))}
+            options={employees.map((emp: Employee) => ({
+              value: emp.fullName,
+              label: emp.fullName,
+            }))}
             selected={newProject.employeeIds}
-            onChange={(values) => setNewProject({ ...newProject, employeeIds: values })}
+            onChange={(values) =>
+              setNewProject({ ...newProject, employeeIds: values })
+            }
           />
           <FormField
             label="Дата початку:"

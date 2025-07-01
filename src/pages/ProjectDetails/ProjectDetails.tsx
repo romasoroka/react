@@ -1,11 +1,14 @@
-import { useParams } from 'react-router-dom';
-import ProjectDetailsTabs from './ProjectDetailsTab';
-import { useAppContext } from '../../context/AppContext';
+import { useParams } from "react-router-dom";
+import ProjectDetailsTabs from "./ProjectDetailsTab";
+import { useProjectContext } from "../../context/ProjectContext";
+import { useEmployeeContext } from "../../context/EmployeeContext";
+import { Project } from "../../types/Models";
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
-  const { projects, employees } = useAppContext();
-  const project = projects.find((p) => p.id === Number(id));
+  const { projects } = useProjectContext();
+  const { employees } = useEmployeeContext();
+  const project = projects.find((p: Project) => p.id === Number(id));
 
   if (!project) {
     return (

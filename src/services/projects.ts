@@ -1,41 +1,78 @@
-import axios from 'axios';
-import { Project } from '../types';
+import axios from "axios";
+import { Project } from "../types/Models";
 
-const API = 'http://localhost:5000/api/Projects';
+const API = "http://localhost:5000/api/Projects";
 
-export const fetchProjects = async (): Promise<Project[]> => (await axios.get(API)).data;
-
-export const getProject = async (id: number): Promise<Project> => {
-  console.log('Fetching project:', `${API}/${id}`);
-  return (await axios.get(`${API}/${id}`)).data;
-};
-export const createProject = async (project: Omit<Project, 'id'>): Promise<Project> => {
+export const fetchProjects = async (): Promise<Project[]> => {
+  console.log("Fetching projects from:", API);
   try {
-    const response = await axios.post(API, project);
-    return response.data;
+    const response = await axios.get(API);
+    console.log("API Projects:", response.data);
+    return response.data.map((project: Project) => ({
+      ...project,
+      employeeIds: project.employeeIds || [],
+    }));
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      console.error('Server error response:', error.response.data);
-      const message = error.response.data.message || error.response.data.error || 'Invalid request';
-      throw new Error(message);
-    }
-    throw new Error('Failed to create project: Unknown error');
+    console.error("Error fetching projects:", error);
+    throw new Error("Failed to fetch projects");
   }
 };
 
-export const updateProject = async (id: number, project: Omit<Project, 'id'>): Promise<void> => {
+export const getProject = async (id: number): Promise<Project> => {
+  console.log("Fetching project:", `${API}/${id}`);
   try {
-    await axios.put(`${API}/${id}`, project);
+    const response = await axios.get(`${API}/${id}`);
+    console.log("API Project:", response.data);
+    return { ...response.data, employeeIds: response.data.employeeIds || [] };
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      console.error('Server error response:', error.response.data);
-      const message = error.response.data.message || error.response.data.error || 'Invalid request';
-      throw new Error(message);
-    }
-    throw new Error('Failed to update project: Unknown error');
+    console.error("Error fetching project:", error);
+    throw new Error("Failed to fetch project");
+  }
+};
+
+export const createProject = async (
+  project: Omit<Project, "id">
+): Promise<Project> => {
+  try {
+    const response = await axios.post(API, project);
+    console.log("Created project:", response.data);
+    return { ...response.data, employeeIds: response.data.employeeIds || [] };
+  } catch (error) {
+    console.error("Error creating project:", error);
+    throw new Error("Failed to create project");
+  }
+};
+
+export const updateProjectService = async (
+  id: number,
+  project: Omit<Project, "id">
+): Promise<Project> => {
+  try {
+    const projectData = {
+      ...project,
+      employeeIds: project.employeeIds || [],
+      workSessions: undefined,
+    };
+    console.log("Updating project:", projectData);
+    const response = await axios.put(`${API}/${id}`, projectData);
+    console.log("Updated project:", response.data);
+    return {
+      ...response.data,
+      id,
+      employeeIds: response.data.employeeIds || [],
+    };
+  } catch (error) {
+    console.error("Error updating project:", error);
+    throw new Error("Failed to update project");
   }
 };
 
 export const deleteProject = async (id: number): Promise<void> => {
-  await axios.delete(`${API}/${id}`);
+  console.log("Deleting project:", id);
+  try {
+    await axios.delete(`${API}/${id}`);
+  } catch (error) {
+    console.error("Error deleting project:", error);
+    throw new Error("Failed to delete project");
+  }
 };

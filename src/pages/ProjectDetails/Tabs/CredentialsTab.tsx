@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Project, Credential } from '../../../types';
-import { createCredential } from '../../../services/credentials';
-import Modal from '../../../components/ui/Modal';
-import FormField from '../../../components/ui/FormField';
+import React, { useState } from "react";
+import { Project, Credential } from "../../../types/Models";
+import { createCredential } from "../../../services/credentials";
+import Modal from "../../../components/ui/Modal";
+import FormField from "../../../components/ui/FormField";
 
 interface ProjectCredentialsTabProps {
   project: Project;
@@ -18,10 +18,10 @@ const ProjectCredentialsTab = ({
   onUpdateProject,
 }: ProjectCredentialsTabProps) => {
   const [isAddCredentialOpen, setIsAddCredentialOpen] = useState(false);
-  const [newCredential, setNewCredential] = useState<Omit<Credential, 'id'>>({
-    name: '',
-    value: '',
-    description: '',
+  const [newCredential, setNewCredential] = useState<Omit<Credential, "id">>({
+    name: "",
+    value: "",
+    description: "",
   });
   const [error, setError] = useState<string | null>(null);
 
@@ -33,8 +33,8 @@ const ProjectCredentialsTab = ({
   };
 
   const validateCredential = () => {
-    if (!newCredential.name.trim()) return 'Назва є обов’язковою';
-    if (!newCredential.value.trim()) return 'Значення є обов’язковим';
+    if (!newCredential.name.trim()) return "Назва є обов’язковою";
+    if (!newCredential.value.trim()) return "Значення є обов’язковим";
     return null;
   };
 
@@ -52,7 +52,7 @@ const ProjectCredentialsTab = ({
       const addedCredential = await createCredential({
         name: newCredential.name.trim(),
         value: newCredential.value.trim(),
-        description: newCredential.description?.trim() || '',
+        description: newCredential.description?.trim() || "",
       });
       const updatedProject = {
         ...project,
@@ -60,11 +60,11 @@ const ProjectCredentialsTab = ({
       };
       await onUpdateProject(updatedProject);
       setIsAddCredentialOpen(false);
-      setNewCredential({ name: '', value: '', description: '' });
+      setNewCredential({ name: "", value: "", description: "" });
     } catch (err) {
       setError(
-        'Помилка при створенні облікових даних: ' +
-          (err instanceof Error ? err.message : 'Невідома помилка')
+        "Помилка при створенні облікових даних: " +
+          (err instanceof Error ? err.message : "Невідома помилка")
       );
     }
   };
@@ -78,26 +78,32 @@ const ProjectCredentialsTab = ({
               key={index}
               className="flex mx-2 flex-col gap-1 p-2 border border-gray-200 dark:border-gray-700 rounded-md bg-white/50 dark:bg-gray-800/50"
             >
-              <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">Назва: {cred.name}</span>
+              <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">
+                Назва: {cred.name}
+              </span>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-600 dark:text-gray-300">
-                  Значення: {showValues[index] ? cred.value : '••••••••'}
+                  Значення: {showValues[index] ? cred.value : "••••••••"}
                 </span>
                 <button
                   type="button"
                   onClick={() => toggleValue(index)}
                   className="text-xs text-blue-600 dark:text-blue-400 hover:underline dark:hover:text-blue-300"
                 >
-                  {showValues[index] ? 'Приховати' : 'Показати'}
+                  {showValues[index] ? "Приховати" : "Показати"}
                 </button>
               </div>
               {cred.description && (
-                <span className="text-xs text-gray-600 dark:text-gray-300">Опис: {cred.description}</span>
+                <span className="text-xs text-gray-600 dark:text-gray-300">
+                  Опис: {cred.description}
+                </span>
               )}
             </div>
           ))
         ) : (
-          <span className="text-sm text-gray-600 dark:text-gray-300 ml-2">Немає облікових даних</span>
+          <span className="text-sm text-gray-600 dark:text-gray-300 ml-2">
+            Немає облікових даних
+          </span>
         )}
         <button
           type="button"
@@ -138,7 +144,7 @@ const ProjectCredentialsTab = ({
           <FormField
             label="Опис:"
             name="description"
-            value={newCredential.description || ''}
+            value={newCredential.description || ""}
             onChange={handleCredentialChange}
             textarea
           />

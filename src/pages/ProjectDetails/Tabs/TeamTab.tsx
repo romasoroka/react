@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import { Employee, Project } from '../../../types';
+import { Link } from "react-router-dom";
+import { Employee, Project } from "../../../types/Models";
 
 interface Props {
   project: Project;
@@ -9,7 +9,11 @@ interface Props {
 const ProjectTeamTab = ({ project, employees }: Props) => {
   const team = project.employeeIds.map((employeeId) => {
     const emp = employees.find((e) => e.id === employeeId);
-    return { name: emp?.fullName || 'Невідомий', id: emp?.id, imageUrl: emp?.imageUrl };
+    return {
+      name: emp?.fullName || "Невідомий",
+      id: emp?.id,
+      imageUrl: emp?.imageUrl,
+    };
   });
 
   return (
@@ -18,7 +22,7 @@ const ProjectTeamTab = ({ project, employees }: Props) => {
         team.map((member, index) => (
           <Link
             key={index}
-            to={member.id ? `/employees/${member.id}` : '#'}
+            to={member.id ? `/employees/${member.id}` : "#"}
             className="flex items-center gap-3 p-2 rounded-lg bg-white/50 hover:bg-gray-100/80 dark:bg-gray-800 dark:hover:bg-gray-700/80 transition-colors"
           >
             {member.imageUrl ? (
@@ -32,7 +36,9 @@ const ProjectTeamTab = ({ project, employees }: Props) => {
                 {member.name[0]}
               </div>
             )}
-            <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">{member.name}</span>
+            <span className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+              {member.name}
+            </span>
           </Link>
         ))
       ) : (
